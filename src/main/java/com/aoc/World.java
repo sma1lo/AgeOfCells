@@ -13,29 +13,33 @@ public class World {
     public static void init() {
         fillWater();
         fillGround();
+
+        for (int i = 0; i < 4; i++) {
+            smoothMap();
+        }
+
         fillNation();
         generateGrid();
     }
 
     public static void generateGrid() {
-
         StringBuilder sb = new StringBuilder();
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
                 if (grid[y][x] == TerrainType.WATER) {
-                    sb.append("~");
+                    sb.append(Color.BLUE).append("~").append(Color.RESET);
                 } else if (grid[y][x] == TerrainType.ROME_CAPITAL) {
-                    sb.append("R");
+                    sb.append(Color.RED).append("R").append(Color.RESET);
                 } else if (grid[y][x] == TerrainType.BAVARIA_CAPITAL) {
-                    sb.append("B");
+                    sb.append(Color.CYAN).append("B").append(Color.RESET);
                 } else if (grid[y][x] == TerrainType.ENGLAND_CAPITAL) {
-                    sb.append("E");
+                    sb.append(Color.GREEN).append("E").append(Color.RESET);
                 } else if (grid[y][x] == TerrainType.ROME_LAND) {
-                    sb.append("r");
+                    sb.append(Color.RED).append("r").append(Color.RESET);
                 } else if (grid[y][x] == TerrainType.BAVARIA_LAND) {
-                    sb.append("b");
+                    sb.append(Color.CYAN).append("b").append(Color.RESET);
                 } else if (grid[y][x] == TerrainType.ENGLAND_LAND) {
-                    sb.append("e");
+                    sb.append(Color.GREEN).append("e").append(Color.RESET);
                 } else {
                     sb.append("0");
                 }
@@ -108,7 +112,6 @@ public class World {
         }
     }
 
-
     private static void tryExpand(int x, int y, TerrainType landType) {
         int nx = x + (rand.nextInt(3) - 1);
         int ny = y + (rand.nextInt(3) - 1);
@@ -118,5 +121,42 @@ public class World {
                 grid[ny][nx] = landType;
             }
         }
+    }
+
+    private static int countGroundNeighbors(int cx, int cy) {
+        int count = 0;
+        for (int yMod = -1; yMod <= 1; yMod++) {
+            for (int xMod = -1; xMod <= 1; xMod++) {
+                int neighborX = cx + xMod;
+                int neighborY = cy + yMod;
+
+                if (xMod == 0 && yMod == 0) continue;
+
+                if (neighborX >= 0 && neighborX < WIDTH && neighborY >= 0 && neighborY < HEIGHT) {
+                    if (grid[neighborY][neighborX] == TerrainType.GROUND) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    public static void smoothMap() {
+        TerrainType[][] buffer = new TerrainType[HEIGHT][WIDTH];
+
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++) {
+                int groundNeighbors = countGroundNeighbors(x, y);
+                if (groundNeighbors > 4) {
+                    buffer[y][x] = TerrainType.GROUND;
+                } else if (groundNeighbors < 4) {
+                    buffer[y][x] = TerrainType.WATER;
+                } else {
+                    buffer[y][x] = grid[y][x];
+                }
+            }
+        }
+        grid = buffer;
     }
 }
