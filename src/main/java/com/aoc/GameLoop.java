@@ -5,10 +5,10 @@ public class GameLoop {
         World.init();
         for (int i = 0; i < 10; i++) {
             Time.tick();
+            World.check();
             Screen.clear();
             System.out.println("Game tick: " + Time.getCurrentTick());
             World.generateGrid();
-
             Thread.sleep(500);
         }
     }

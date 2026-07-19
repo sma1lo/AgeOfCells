@@ -30,6 +30,12 @@ public class World {
                     sb.append("B");
                 } else if (grid[y][x] == TerrainType.ENGLAND_CAPITAL) {
                     sb.append("E");
+                } else if (grid[y][x] == TerrainType.ROME_LAND) {
+                    sb.append("r");
+                } else if (grid[y][x] == TerrainType.BAVARIA_LAND) {
+                    sb.append("b");
+                } else if (grid[y][x] == TerrainType.ENGLAND_LAND) {
+                    sb.append("e");
                 } else {
                     sb.append("0");
                 }
@@ -77,6 +83,39 @@ public class World {
             if (grid[y][x] == TerrainType.GROUND) {
                 grid[y][x] = capitalType;
                 break;
+            }
+        }
+    }
+
+    public static void check() {
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++) {
+                if (grid[y][x] == TerrainType.ROME_CAPITAL || grid[y][x] == TerrainType.ROME_LAND) {
+
+                    if (rand.nextInt(100) < 15) {
+                        tryExpand(x, y, TerrainType.ROME_LAND);
+                    }
+                } else if (grid[y][x] == TerrainType.BAVARIA_CAPITAL || grid[y][x] == TerrainType.BAVARIA_LAND) {
+                    if (rand.nextInt(100) < 15) {
+                        tryExpand(x, y, TerrainType.BAVARIA_LAND);
+                    }
+                } else if (grid[y][x] == TerrainType.ENGLAND_CAPITAL || grid[y][x] == TerrainType.ENGLAND_LAND) {
+                    if (rand.nextInt(100) < 15) {
+                        tryExpand(x, y, TerrainType.ENGLAND_LAND);
+                    }
+                }
+            }
+        }
+    }
+
+
+    private static void tryExpand(int x, int y, TerrainType landType) {
+        int nx = x + (rand.nextInt(3) - 1);
+        int ny = y + (rand.nextInt(3) - 1);
+
+        if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+            if (grid[ny][nx] == TerrainType.GROUND) {
+                grid[ny][nx] = landType;
             }
         }
     }
