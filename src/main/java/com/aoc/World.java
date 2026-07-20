@@ -1,14 +1,16 @@
 package com.aoc;
 
-
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class World {
-    static final int WIDTH = 40;
-    static final int HEIGHT = 20;
+    static final int WIDTH = 50;
+    static final int HEIGHT = 50;
     static Random rand = new Random();
     static TerrainType[][] grid = new TerrainType[HEIGHT][WIDTH];
+    static List<Nation> nations = new ArrayList<Nation>();
 
     public static void init() {
         fillWater();
@@ -68,14 +70,12 @@ public class World {
     }
 
     public static void fillNation() {
-        Nation rome = new Nation("Rome", NationType.ROME, BigInteger.valueOf(rand.nextInt(100) + 50));
-        Nation bavaria = new Nation("Bavaria", NationType.BAVARIA, BigInteger.valueOf(rand.nextInt(100) + 50));
-        Nation england = new Nation("England", NationType.ENGLAND, BigInteger.valueOf(rand.nextInt(100) + 50));
+        nations.add(new Nation("Rome", NationType.ROME, BigInteger.valueOf(rand.nextInt(100) + 50)));
+        nations.add(new Nation("Bavaria", NationType.BAVARIA, BigInteger.valueOf(rand.nextInt(100) + 50)));
+        nations.add(new Nation("England", NationType.ENGLAND, BigInteger.valueOf(rand.nextInt(100) + 50)));
 
         spawnCapital(TerrainType.ROME_CAPITAL);
-
         spawnCapital(TerrainType.BAVARIA_CAPITAL);
-
         spawnCapital(TerrainType.ENGLAND_CAPITAL);
     }
 
@@ -95,7 +95,6 @@ public class World {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
                 if (grid[y][x] == TerrainType.ROME_CAPITAL || grid[y][x] == TerrainType.ROME_LAND) {
-
                     if (rand.nextInt(100) < 15) {
                         tryExpand(x, y, TerrainType.ROME_LAND);
                     }
@@ -119,6 +118,20 @@ public class World {
         if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
             if (grid[ny][nx] == TerrainType.GROUND) {
                 grid[ny][nx] = landType;
+            } else if (grid[ny][nx] == TerrainType.ROME_LAND || grid[ny][nx] == TerrainType.BAVARIA_LAND || grid[ny][nx] == TerrainType.ENGLAND_LAND) {
+                Nation attacker = null;
+                if (landType == TerrainType.ROME_LAND) attacker = nations.get(0);
+                if (landType == TerrainType.BAVARIA_LAND) attacker = nations.get(1);
+                if (landType == TerrainType.ENGLAND_LAND) attacker = nations.get(2);
+
+                if (attacker != null && attacker.state == SituationState.WAR) {
+                    if (rand.nextInt(100) < 25) {
+                        grid[ny][nx] = landType;
+                    }
+                }
+
+            } else if (grid[ny][nx] == TerrainType.WATER) {
+                //TODO seafaring
             }
         }
     }

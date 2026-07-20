@@ -7,11 +7,13 @@ public class Nation {
     NationType nationType;
     BigInteger power;
     Color color;
+    SituationState state;
 
     public Nation(String name, NationType nationType, BigInteger power) {
         this.name = name;
         this.nationType = nationType;
         this.power = power;
+        this.state = SituationState.PEACE;
 
         if (this.nationType == NationType.ROME) {
             this.color = Color.RED;
@@ -40,6 +42,10 @@ public class Nation {
         return color;
     }
 
+    public SituationState getState() {
+        return state;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -54,5 +60,9 @@ public class Nation {
 
     public void setColor(Color color) {
         this.color = color;
+    }
+
+    public void setState(SituationState state) {
+        this.state = state;
     }
 }

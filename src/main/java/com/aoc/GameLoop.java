@@ -3,7 +3,7 @@ package com.aoc;
 public class GameLoop {
     public static void run() throws InterruptedException {
         World.init();
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < 3000; i++) {
             Time.tick();
             World.check();
             Screen.clear();
