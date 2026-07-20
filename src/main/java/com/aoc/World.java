@@ -43,7 +43,7 @@ public class World {
                     } else if (cellTypeGrid[y][x] == CellType.LAND) {
                         sb.append(n.getColor()).append(letter.toLowerCase()).append(Color.RESET);
                     } else if (cellTypeGrid[y][x] == CellType.SHIP) {
-                        sb.append(n.getColor()).append("S").append(Color.RESET);
+                        sb.append(n.getColor()).append("^").append(Color.RESET);
                     }
                 } else {
                     sb.append("0");
@@ -77,10 +77,18 @@ public class World {
         nations.add(new Nation("Rome", NationType.ROME, BigInteger.valueOf(rand.nextInt(100) + 50)));
         nations.add(new Nation("Bavaria", NationType.BAVARIA, BigInteger.valueOf(rand.nextInt(100) + 50)));
         nations.add(new Nation("England", NationType.ENGLAND, BigInteger.valueOf(rand.nextInt(100) + 50)));
+        nations.add(new Nation("Russia", NationType.RUSSIA, BigInteger.valueOf(rand.nextInt(100) + 50)));
+        nations.add(new Nation("Austria", NationType.AUSTRIA, BigInteger.valueOf(rand.nextInt(100) + 50)));
+        nations.add(new Nation("Scotland", NationType.SCOTLAND, BigInteger.valueOf(rand.nextInt(100) + 50)));
+        nations.add(new Nation("France", NationType.FRANCE, BigInteger.valueOf(rand.nextInt(100) + 50)));
 
         spawnCapital(nations.get(0));
         spawnCapital(nations.get(1));
         spawnCapital(nations.get(2));
+        spawnCapital(nations.get(3));
+        spawnCapital(nations.get(4));
+        spawnCapital(nations.get(5));
+        spawnCapital(nations.get(6));
     }
 
     private static void spawnCapital(Nation nation) {
@@ -104,6 +112,12 @@ public class World {
                 if (cellOwner != null && (cellTypeGrid[y][x] == CellType.CAPITAL || cellTypeGrid[y][x] == CellType.LAND)) {
                     if (rand.nextInt(100) < 15) {
                         tryExpand(x, y, cellOwner);
+                    }
+                }
+
+                if (cellOwner != null && (cellTypeGrid[y][x] == CellType.SHIP)) {
+                    if (rand.nextInt(100) < 20) {
+                        trySail(x, y, cellOwner);
                     }
                 }
             }
@@ -132,6 +146,36 @@ public class World {
             }
         }
     }
+
+    private static void trySail(int x, int y, Nation attacker) {
+        int nx = x + (rand.nextInt(3) - 1);
+        int ny = y + (rand.nextInt(3) - 1);
+
+        if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+            if (grid[ny][nx] == TerrainType.WATER && nationGrid[ny][nx] == null) {
+                nationGrid[ny][nx] = attacker;
+                cellTypeGrid[ny][nx] = CellType.SHIP;
+
+                nationGrid[y][x] = null;
+                cellTypeGrid[y][x] = CellType.NONE;
+            } else if (grid[ny][nx] == TerrainType.GROUND && nationGrid[ny][nx] == null) {
+                nationGrid[ny][nx] = attacker;
+                cellTypeGrid[ny][nx] = CellType.LAND;
+
+                nationGrid[y][x] = null;
+                cellTypeGrid[y][x] = CellType.NONE;
+            }else if (nationGrid[ny][nx] != null && nationGrid[ny][nx] != attacker && cellTypeGrid[ny][nx] != CellType.SHIP) {
+                if (attacker.state == SituationState.WAR && rand.nextInt(100) < 25) {
+                    nationGrid[ny][nx] = attacker;
+                    cellTypeGrid[ny][nx] = CellType.LAND;
+
+                    nationGrid[y][x] = null;
+                    cellTypeGrid[y][x] = CellType.NONE;
+                }
+            }
+        }
+    }
+
 
     private static int countGroundNeighbors(int cx, int cy) {
         int count = 0;

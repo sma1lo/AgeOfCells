@@ -18,9 +18,17 @@ public class Nation {
         if (this.nationType == NationType.ROME) {
             this.color = Color.RED;
         } else if (this.nationType == NationType.BAVARIA) {
-            this.color = Color.BLUE;
+            this.color = Color.CYAN;
         } else if (this.nationType == NationType.ENGLAND) {
             this.color = Color.GREEN;
+        }else if (this.nationType == NationType.FRANCE) {
+            this.color = Color.PINK;
+        }else if (this.nationType == NationType.SCOTLAND) {
+            this.color = Color.YELLOW;
+        }else if (this.nationType == NationType.AUSTRIA) {
+            this.color = Color.PURPLE;
+        }else if (this.nationType == NationType.RUSSIA) {
+            this.color = Color.BROWN;
         } else {
             this.color = Color.WHITE;
         }
