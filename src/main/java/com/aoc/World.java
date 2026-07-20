@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.Random;
 
 public class World {
-    static final int WIDTH = 50;
-    static final int HEIGHT = 50;
+    static final int WIDTH = 205;
+    static final int HEIGHT = 53;
     static Random rand = new Random();
     static TerrainType[][] grid = new TerrainType[HEIGHT][WIDTH];
+    static Nation[][] nationGrid = new Nation[HEIGHT][WIDTH];
+    static CellType[][] cellTypeGrid = new CellType[HEIGHT][WIDTH];
+
     static List<Nation> nations = new ArrayList<Nation>();
 
     public static void init() {
@@ -28,20 +31,20 @@ public class World {
         StringBuilder sb = new StringBuilder();
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
-                if (grid[y][x] == TerrainType.WATER) {
+
+                if (grid[y][x] == TerrainType.WATER && nationGrid[y][x] == null) {
                     sb.append(Color.BLUE).append("~").append(Color.RESET);
-                } else if (grid[y][x] == TerrainType.ROME_CAPITAL) {
-                    sb.append(Color.RED).append("R").append(Color.RESET);
-                } else if (grid[y][x] == TerrainType.BAVARIA_CAPITAL) {
-                    sb.append(Color.CYAN).append("B").append(Color.RESET);
-                } else if (grid[y][x] == TerrainType.ENGLAND_CAPITAL) {
-                    sb.append(Color.GREEN).append("E").append(Color.RESET);
-                } else if (grid[y][x] == TerrainType.ROME_LAND) {
-                    sb.append(Color.RED).append("r").append(Color.RESET);
-                } else if (grid[y][x] == TerrainType.BAVARIA_LAND) {
-                    sb.append(Color.CYAN).append("b").append(Color.RESET);
-                } else if (grid[y][x] == TerrainType.ENGLAND_LAND) {
-                    sb.append(Color.GREEN).append("e").append(Color.RESET);
+                } else if (nationGrid[y][x] != null) {
+                    Nation n = nationGrid[y][x];
+                    String letter = n.getName().substring(0, 1);
+
+                    if (cellTypeGrid[y][x] == CellType.CAPITAL) {
+                        sb.append(n.getColor()).append(letter.toUpperCase()).append(Color.RESET);
+                    } else if (cellTypeGrid[y][x] == CellType.LAND) {
+                        sb.append(n.getColor()).append(letter.toLowerCase()).append(Color.RESET);
+                    } else if (cellTypeGrid[y][x] == CellType.SHIP) {
+                        sb.append(n.getColor()).append("S").append(Color.RESET);
+                    }
                 } else {
                     sb.append("0");
                 }
@@ -55,6 +58,7 @@ public class World {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
                 grid[y][x] = TerrainType.WATER;
+                cellTypeGrid[y][x] = CellType.NONE;
             }
         }
     }
@@ -74,18 +78,19 @@ public class World {
         nations.add(new Nation("Bavaria", NationType.BAVARIA, BigInteger.valueOf(rand.nextInt(100) + 50)));
         nations.add(new Nation("England", NationType.ENGLAND, BigInteger.valueOf(rand.nextInt(100) + 50)));
 
-        spawnCapital(TerrainType.ROME_CAPITAL);
-        spawnCapital(TerrainType.BAVARIA_CAPITAL);
-        spawnCapital(TerrainType.ENGLAND_CAPITAL);
+        spawnCapital(nations.get(0));
+        spawnCapital(nations.get(1));
+        spawnCapital(nations.get(2));
     }
 
-    private static void spawnCapital(TerrainType capitalType) {
+    private static void spawnCapital(Nation nation) {
         while (true) {
             int x = rand.nextInt(WIDTH);
             int y = rand.nextInt(HEIGHT);
 
-            if (grid[y][x] == TerrainType.GROUND) {
-                grid[y][x] = capitalType;
+            if (grid[y][x] == TerrainType.GROUND && nationGrid[y][x] == null) {
+                nationGrid[y][x] = nation;
+                cellTypeGrid[y][x] = CellType.CAPITAL;
                 break;
             }
         }
@@ -94,44 +99,36 @@ public class World {
     public static void check() {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
-                if (grid[y][x] == TerrainType.ROME_CAPITAL || grid[y][x] == TerrainType.ROME_LAND) {
+                Nation cellOwner = nationGrid[y][x];
+
+                if (cellOwner != null && (cellTypeGrid[y][x] == CellType.CAPITAL || cellTypeGrid[y][x] == CellType.LAND)) {
                     if (rand.nextInt(100) < 15) {
-                        tryExpand(x, y, TerrainType.ROME_LAND);
-                    }
-                } else if (grid[y][x] == TerrainType.BAVARIA_CAPITAL || grid[y][x] == TerrainType.BAVARIA_LAND) {
-                    if (rand.nextInt(100) < 15) {
-                        tryExpand(x, y, TerrainType.BAVARIA_LAND);
-                    }
-                } else if (grid[y][x] == TerrainType.ENGLAND_CAPITAL || grid[y][x] == TerrainType.ENGLAND_LAND) {
-                    if (rand.nextInt(100) < 15) {
-                        tryExpand(x, y, TerrainType.ENGLAND_LAND);
+                        tryExpand(x, y, cellOwner);
                     }
                 }
             }
         }
     }
 
-    private static void tryExpand(int x, int y, TerrainType landType) {
+    private static void tryExpand(int x, int y, Nation attacker) {
         int nx = x + (rand.nextInt(3) - 1);
         int ny = y + (rand.nextInt(3) - 1);
 
         if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
-            if (grid[ny][nx] == TerrainType.GROUND) {
-                grid[ny][nx] = landType;
-            } else if (grid[ny][nx] == TerrainType.ROME_LAND || grid[ny][nx] == TerrainType.BAVARIA_LAND || grid[ny][nx] == TerrainType.ENGLAND_LAND) {
-                Nation attacker = null;
-                if (landType == TerrainType.ROME_LAND) attacker = nations.get(0);
-                if (landType == TerrainType.BAVARIA_LAND) attacker = nations.get(1);
-                if (landType == TerrainType.ENGLAND_LAND) attacker = nations.get(2);
 
-                if (attacker != null && attacker.state == SituationState.WAR) {
-                    if (rand.nextInt(100) < 25) {
-                        grid[ny][nx] = landType;
-                    }
+            if (grid[ny][nx] == TerrainType.GROUND && nationGrid[ny][nx] == null) {
+                nationGrid[ny][nx] = attacker;
+                cellTypeGrid[ny][nx] = CellType.LAND;
+            } else if (nationGrid[ny][nx] != null && nationGrid[ny][nx] != attacker && cellTypeGrid[ny][nx] != CellType.SHIP) {
+                if (attacker.state == SituationState.WAR && rand.nextInt(100) < 25) {
+                    nationGrid[ny][nx] = attacker;
+                    cellTypeGrid[ny][nx] = CellType.LAND;
                 }
-
-            } else if (grid[ny][nx] == TerrainType.WATER) {
-                //TODO seafaring
+            } else if (grid[ny][nx] == TerrainType.WATER && nationGrid[ny][nx] == null) {
+                if (rand.nextInt(100) < 5) {
+                    nationGrid[ny][nx] = attacker;
+                    cellTypeGrid[ny][nx] = CellType.SHIP;
+                }
             }
         }
     }
