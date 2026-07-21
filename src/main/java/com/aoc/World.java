@@ -78,7 +78,16 @@ public class World {
         nations.add(new Nation("Austria", NationType.AUSTRIA, rand.nextInt(100) + 50));
         nations.add(new Nation("Scotland", NationType.SCOTLAND, rand.nextInt(100) + 50));
         nations.add(new Nation("France", NationType.FRANCE, rand.nextInt(100) + 50));
-
+        nations.add(new Nation("Prussia", NationType.PRUSSIA, rand.nextInt(100) + 50));
+        nations.add(new Nation("Ottomans", NationType.OTTOMANS, rand.nextInt(100) + 50));
+        nations.add(new Nation("Spain", NationType.SPAIN, rand.nextInt(100) + 50));
+        nations.add(new Nation("Sweden", NationType.SWEDEN, rand.nextInt(100) + 50));
+        nations.add(new Nation("Poland", NationType.POLAND, rand.nextInt(100) + 50));
+        nations.add(new Nation("Venice", NationType.VENICE, rand.nextInt(100) + 50));
+        nations.add(new Nation("Portugal", NationType.PORTUGAL, rand.nextInt(100) + 50));
+        nations.add(new Nation("Denmark", NationType.DENMARK, rand.nextInt(100) + 50));
+        nations.add(new Nation("Netherlands", NationType.NETHERLANDS, rand.nextInt(100) + 50));
+        nations.add(new Nation("Persia", NationType.PERSIA, rand.nextInt(100) + 50));
         for (Nation nation : nations) {
             spawnCapital(nation);
         }

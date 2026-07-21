@@ -17,7 +17,6 @@ public class Nation {
         this.gold = startingPower;
         this.totalCells = 0;
         this.state = SituationState.PEACE;
-
         this.color = switch (nationType) {
             case ROME -> Color.RED;
             case BAVARIA -> Color.CYAN;
@@ -26,6 +25,16 @@ public class Nation {
             case SCOTLAND -> Color.YELLOW;
             case AUSTRIA -> Color.PURPLE;
             case RUSSIA -> Color.BROWN;
+            case PRUSSIA -> Color.BLUE;
+            case OTTOMANS -> Color.ORANGE;
+            case SPAIN -> Color.WHITE;
+            case SWEDEN -> Color.GRAY;
+            case POLAND -> Color.BRIGHT_RED;
+            case VENICE -> Color.GOLD;
+            case PORTUGAL -> Color.LIME;
+            case DENMARK -> Color.MAGENTA;
+            case NETHERLANDS -> Color.BRIGHT_YELLOW;
+            case PERSIA -> Color.TEAL;
             default -> Color.WHITE;
         };
     }

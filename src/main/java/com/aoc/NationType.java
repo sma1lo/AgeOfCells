@@ -7,5 +7,15 @@ public enum NationType {
     FRANCE,
     AUSTRIA,
     SCOTLAND,
-    RUSSIA;
+    RUSSIA,
+    PRUSSIA,
+    OTTOMANS,
+    SPAIN,
+    SWEDEN,
+    POLAND,
+    VENICE,
+    PORTUGAL,
+    DENMARK,
+    NETHERLANDS,
+    PERSIA;
 }
