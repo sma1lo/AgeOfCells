@@ -4,10 +4,17 @@ import java.util.Random;
 
 public class GameLoop {
     static Random rand = new Random();
+
     public static void run() throws InterruptedException {
         World.init();
         while (true) {
             Time.tick();
+            World.collectEconomy();
+            if (Time.getCurrentTick() % 4 == 0) {
+                for (Nation n : World.nations) {
+                    n.strengthenFromGold();
+                }
+            }
             World.check();
             Screen.clear();
             System.out.println("Game tick: " + Time.getCurrentTick());
