@@ -1,7 +1,7 @@
 package com.aoc;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -12,6 +12,7 @@ public class World {
 
     static Cell[][] cells = new Cell[HEIGHT][WIDTH];
     static List<Nation> nations = new ArrayList<>();
+    private static final StringBuilder gridBuilder = new StringBuilder(WIDTH * HEIGHT * 15);
 
     public static void init() {
         fillWater();
@@ -23,31 +24,31 @@ public class World {
     }
 
     public static void generateGrid() {
-        StringBuilder sb = new StringBuilder();
+        gridBuilder.setLength(0);
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
                 Cell cell = cells[y][x];
 
                 if (cell.isWater() && !cell.isOwned()) {
-                    sb.append(Color.BLUE).append("~").append(Color.RESET);
+                    gridBuilder.append(Color.BLUE).append("~").append(Color.RESET);
                 } else if (cell.isOwned()) {
                     Nation n = cell.getOwner();
                     String letter = n.getName().substring(0, 1);
 
                     if (cell.isCapital()) {
-                        sb.append(n.getColor()).append(letter.toUpperCase()).append(Color.RESET);
+                        gridBuilder.append(n.getColor()).append(letter.toUpperCase()).append(Color.RESET);
                     } else if (cell.isLand()) {
-                        sb.append(n.getColor()).append(letter.toLowerCase()).append(Color.RESET);
+                        gridBuilder.append(n.getColor()).append(letter.toLowerCase()).append(Color.RESET);
                     } else if (cell.isShip()) {
-                        sb.append(n.getColor()).append("^").append(Color.RESET);
+                        gridBuilder.append(n.getColor()).append("^").append(Color.RESET);
                     }
                 } else {
-                    sb.append("0");
+                    gridBuilder.append("0");
                 }
             }
-            sb.append("\n");
+            gridBuilder.append("\n");
         }
-        System.out.println(sb.toString());
+        System.out.println(gridBuilder.toString());
     }
 
     private static void fillWater() {
@@ -69,13 +70,14 @@ public class World {
     }
 
     public static void fillNation() {
-        nations.add(new Nation("Rome", NationType.ROME, BigInteger.valueOf(rand.nextInt(100) + 50)));
-        nations.add(new Nation("Bavaria", NationType.BAVARIA, BigInteger.valueOf(rand.nextInt(100) + 50)));
-        nations.add(new Nation("England", NationType.ENGLAND, BigInteger.valueOf(rand.nextInt(100) + 50)));
-        nations.add(new Nation("Russia", NationType.RUSSIA, BigInteger.valueOf(rand.nextInt(100) + 50)));
-        nations.add(new Nation("Austria", NationType.AUSTRIA, BigInteger.valueOf(rand.nextInt(100) + 50)));
-        nations.add(new Nation("Scotland", NationType.SCOTLAND, BigInteger.valueOf(rand.nextInt(100) + 50)));
-        nations.add(new Nation("France", NationType.FRANCE, BigInteger.valueOf(rand.nextInt(100) + 50)));
+        nations.clear();
+        nations.add(new Nation("Rome", NationType.ROME, rand.nextInt(100) + 50));
+        nations.add(new Nation("Bavaria", NationType.BAVARIA, rand.nextInt(100) + 50));
+        nations.add(new Nation("England", NationType.ENGLAND, rand.nextInt(100) + 50));
+        nations.add(new Nation("Russia", NationType.RUSSIA, rand.nextInt(100) + 50));
+        nations.add(new Nation("Austria", NationType.AUSTRIA, rand.nextInt(100) + 50));
+        nations.add(new Nation("Scotland", NationType.SCOTLAND, rand.nextInt(100) + 50));
+        nations.add(new Nation("France", NationType.FRANCE, rand.nextInt(100) + 50));
 
         for (Nation nation : nations) {
             spawnCapital(nation);
@@ -83,7 +85,8 @@ public class World {
     }
 
     private static void spawnCapital(Nation nation) {
-        while (true) {
+        int attempts = 0;
+        while (attempts < 10000) {
             int x = rand.nextInt(WIDTH);
             int y = rand.nextInt(HEIGHT);
             Cell cell = cells[y][x];
@@ -92,24 +95,29 @@ public class World {
                 cell.setType(CellType.CAPITAL);
                 break;
             }
+            attempts++;
         }
     }
 
     public static void collectEconomy() {
+        for (Nation nation : nations) {
+            nation.resetTotalCells();
+        }
+
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
                 Cell cell = cells[y][x];
                 Nation owner = cell.getOwner();
                 if (owner == null) continue;
 
-                BigInteger income = switch (cell.getType()) {
-                    case CAPITAL -> BigInteger.valueOf(8);
-                    case LAND -> BigInteger.valueOf(3);
-                    case SHIP -> BigInteger.valueOf(2);
-                    default -> BigInteger.ZERO;
+                long income = switch (cell.getType()) {
+                    case CAPITAL -> 8;
+                    case LAND -> 3;
+                    case SHIP -> 2;
+                    default -> 0;
                 };
 
-                if (income.compareTo(BigInteger.ZERO) > 0) {
+                if (income > 0) {
                     owner.addGold(income);
                     owner.incrementTotalCells();
                 }
@@ -137,39 +145,80 @@ public class World {
         }
     }
 
+    public static void checkCapitals() {
+        Iterator<Nation> iterator = nations.iterator();
+        while (iterator.hasNext()) {
+            Nation nation = iterator.next();
+            if (!hasCapital(nation)) {
+                eliminateNation(nation);
+                iterator.remove();
+            }
+        }
+    }
+
+    private static boolean hasCapital(Nation nation) {
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++) {
+                Cell cell = cells[y][x];
+                if (cell.getOwner() == nation && cell.isCapital()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static void eliminateNation(Nation nation) {
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++) {
+                Cell cell = cells[y][x];
+                if (cell.getOwner() == nation) {
+                    cell.setOwner(null);
+                    cell.setType(CellType.NONE);
+                }
+            }
+        }
+    }
+
     private static void tryExpand(int x, int y, Nation attacker) {
-        if (attacker.getPower().compareTo(BigInteger.valueOf(8)) < 0) return;
+        if (attacker.getPower() < 8) return;
 
         int nx = x + (rand.nextInt(3) - 1);
         int ny = y + (rand.nextInt(3) - 1);
         if (nx < 0 || nx >= WIDTH || ny < 0 || ny >= HEIGHT) return;
 
         Cell target = cells[ny][nx];
-        BigInteger cost = BigInteger.valueOf(5);
-        int chance = 15 + attacker.getPower().intValue() / 7;
+        long cost = 5;
+        int chance = (int) (15 + attacker.getPower() / 7);
 
         if (attacker.getState() == SituationState.WAR) {
             chance += 20;
-            cost = cost.multiply(BigInteger.valueOf(2));
+            cost *= 2;
         }
+
         if (target.isGround() && !target.isOwned()) {
             if (attacker.spendGold(cost)) {
                 target.setOwner(attacker);
                 target.setType(CellType.LAND);
-                attacker.addPower(BigInteger.ONE);
+                attacker.addPower(1);
             }
         } else if (target.isOwned() && target.getOwner() != attacker && !target.isShip()) {
             if (attacker.getState() == SituationState.WAR && rand.nextInt(100) < chance) {
                 if (attacker.spendGold(cost)) {
                     target.setOwner(attacker);
-                    target.setType(CellType.LAND);
-                    attacker.addPower(BigInteger.valueOf(2));
+                    if (!target.isCapital()) {
+                        target.setType(CellType.LAND);
+                    }
+                    attacker.addPower(2);
                 }
             }
         } else if (target.isWater() && !target.isOwned()) {
-            if (rand.nextInt(100) < 8 && attacker.spendGold(BigInteger.valueOf(4))) {
-                target.setOwner(attacker);
-                target.setType(CellType.SHIP);
+            if (rand.nextInt(100) < 8 && attacker.spendGold(4)) {
+                if (attacker.getShipCount() < 10) {
+                    target.setOwner(attacker);
+                    target.setType(CellType.SHIP);
+                    attacker.incrementShipCount();
+                }
             }
         }
     }
@@ -183,20 +232,28 @@ public class World {
         Cell current = cells[y][x];
 
         if ((target.isWater() || target.isGround()) && !target.isOwned()) {
-            if (attacker.spendGold(BigInteger.valueOf(3))) {
+            if (attacker.spendGold(3)) {
                 target.setOwner(attacker);
-                target.setType(target.isWater() ? CellType.SHIP : CellType.LAND);
+                if (target.isWater()) {
+                    target.setType(CellType.SHIP);
+                } else {
+                    target.setType(CellType.LAND);
+                    attacker.decrementShipCount();
+                }
                 current.setOwner(null);
                 current.setType(CellType.NONE);
             }
         } else if (target.isOwned() && target.getOwner() != attacker && !target.isShip()) {
             if (attacker.getState() == SituationState.WAR && rand.nextInt(100) < 30) {
-                if (attacker.spendGold(BigInteger.valueOf(8))) {
+                if (attacker.spendGold(8)) {
                     target.setOwner(attacker);
-                    target.setType(CellType.LAND);
+                    if (!target.isCapital()) {
+                        target.setType(CellType.LAND);
+                    }
                     current.setOwner(null);
                     current.setType(CellType.NONE);
-                    attacker.addPower(BigInteger.valueOf(3));
+                    attacker.decrementShipCount();
+                    attacker.addPower(3);
                 }
             }
         }

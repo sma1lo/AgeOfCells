@@ -10,33 +10,34 @@ public class GameLoop {
         while (true) {
             Time.tick();
             World.collectEconomy();
+
             if (Time.getCurrentTick() % 4 == 0) {
                 for (Nation n : World.nations) {
                     n.strengthenFromGold();
                 }
             }
+
             World.check();
+            World.checkCapitals();
+
             Screen.clear();
-            System.out.println("Game tick: " + Time.getCurrentTick());
+            System.out.println("Game tick: " + Time.getCurrentTick() + " | Active Nations: " + World.nations.size());
+
             rotateState();
             World.generateGrid();
-            Thread.sleep(500);
+
+            Thread.sleep(300);
         }
     }
 
     public static void rotateState() {
-        int currentTick = Time.getCurrentTick();
-
-        if (currentTick % 30 == 0) {
-            int chance = rand.nextInt(100);
-
-            if (chance < 50) {
-                for (Nation nation : World.nations) {
-                    nation.state = SituationState.WAR;
-                }
-            } else {
-                for (Nation nation : World.nations) {
-                    nation.state = SituationState.PEACE;
+        int tick = Time.getCurrentTick();
+        if (tick % 35 == 0) {
+            for (Nation nation : World.nations) {
+                if (rand.nextInt(100) < 55) {
+                    nation.setState(SituationState.WAR);
+                } else {
+                    nation.setState(SituationState.PEACE);
                 }
             }
         }
