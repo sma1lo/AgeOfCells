@@ -2,6 +2,7 @@ package com.aoc;
 
 import com.aoc.cell.*;
 import com.aoc.config.Config;
+import com.aoc.diplomacy.DiplomacyManager;
 import com.aoc.map.MapGenerator;
 import com.aoc.nation.Nation;
 import com.aoc.nation.NationType;
@@ -59,7 +60,7 @@ public class World {
                 nation.strengthenFromGold();
             }
         }
-
+        DiplomacyManager.update(nations);
         rotateState();
         check();
         checkCapitals();
@@ -102,11 +103,24 @@ public class World {
         }
     }
 
+    private static boolean hasLand(Nation nation) {
+        for (Cell cell : nation.getOwnedCells()) {
+            if (cell.isLand() || cell.isCapital()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void checkCapitals() {
         Iterator<Nation> iterator = nations.iterator();
         while (iterator.hasNext()) {
             Nation nation = iterator.next();
-            if (!hasCapital(nation)) {
+
+            boolean noLand = !hasLand(nation);
+            boolean noCapitalAndNotVassal = !hasCapital(nation) && !nation.isVassal();
+
+            if (noLand || noCapitalAndNotVassal) {
                 eliminateNation(nation);
                 iterator.remove();
             }
@@ -123,6 +137,13 @@ public class World {
     }
 
     private static void eliminateNation(Nation nation) {
+        if (nation.isVassal()) {
+            nation.getMaster().removeVassal(nation);
+        }
+        for (Nation v : new ArrayList<>(nation.getVassals())) {
+            nation.removeVassal(v);
+        }
+
         List<Cell> cellsToClear = new ArrayList<>(nation.getOwnedCells());
         for (Cell cell : cellsToClear) {
             cell.setType(CellType.NONE);
@@ -157,8 +178,14 @@ public class World {
                 return;
             }
 
+            if (isFriendly(attacker, target.getOwner())) {
+                return;
+            }
+
             if (attacker.getState() == SituationState.WAR && Config.RAND.nextInt(100) < chance) {
                 if (attacker.spendGold(cost)) {
+                    handleCapitalCaptureIfNeeded(target, attacker);
+
                     claimCell(target, attacker);
                     if (!target.isCapital()) {
                         target.setType(CellType.LAND);
@@ -198,8 +225,13 @@ public class World {
                 claimCell(current, null);
             }
         } else if (target.isOwned() && target.getOwner() != attacker && !target.isShip()) {
+            if (isFriendly(attacker, target.getOwner())) {
+                return;
+            }
             if (attacker.getState() == SituationState.WAR && Config.RAND.nextInt(100) < 30) {
                 if (attacker.spendGold(8)) {
+                    handleCapitalCaptureIfNeeded(target, attacker);
+
                     claimCell(target, attacker);
                     if (!target.isCapital()) {
                         target.setType(CellType.LAND);
@@ -211,17 +243,30 @@ public class World {
         }
     }
 
+    private static void handleCapitalCaptureIfNeeded(Cell target, Nation attacker) {
+        if (target.isCapital()) {
+            Nation defender = target.getOwner();
+            if (defender != null && defender != attacker) {
+                if (Config.RAND.nextInt(100) < 70) {
+                    DiplomacyManager.makeVassal(attacker, defender);
+                }
+            }
+        }
+    }
+
     private static void rotateState() {
         int tick = Time.getCurrentTick();
         if (tick % 35 == 0) {
             for (Nation nation : nations) {
+                if (nation.isVassal()) continue;
+
                 int chance = Config.RAND.nextInt(100);
 
                 if (chance < 55) {
                     nation.setState(SituationState.WAR);
                 } else if (chance < 80 && nations.size() > 1) {
                     Nation partner = Element.getRandomElement(nations);
-                    if (partner != null && partner != nation) {
+                    if (partner != null && partner != nation && !partner.isVassal()) {
                         nation.setState(SituationState.UNION);
                         partner.setState(SituationState.UNION);
                     }
@@ -230,6 +275,18 @@ public class World {
                 }
             }
         }
+    }
+
+    private static boolean isFriendly(Nation a, Nation b) {
+        if (a == null || b == null || a == b) return true;
+        if (a.getVassals().contains(b) || b.getVassals().contains(a)) {
+            return true;
+        }
+        if (a.getState() == SituationState.UNION && b.getState() == SituationState.UNION) {
+            return true;
+        }
+
+        return false;
     }
 
     public static void claimCell(Cell cell, Nation newOwner) {

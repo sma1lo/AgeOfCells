@@ -3,19 +3,22 @@ package com.aoc.nation;
 import com.aoc.cell.Cell;
 import com.aoc.util.Color;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Nation {
     private String name;
-    private NationType nationType;
     private long power;
     private long gold;
-    private Color color;
     protected SituationState state;
     private int shipCount = 0;
+    private int stability = 100;
+    private int libertyDesire = 0; // От 0 до 100 (желание вассала восстать)
+    private NationType nationType;
+    private Color color;
+
+    private Nation master = null; // Если null — нация полностью независима
     private final Set<Cell> ownedCells = new HashSet<>();
+    private final List<Nation> vassals = new ArrayList<>();
 
     public Nation(String name, NationType nationType, long startingPower) {
         this.name = name;
@@ -23,6 +26,7 @@ public class Nation {
         this.power = startingPower;
         this.gold = startingPower;
         this.state = SituationState.PEACE;
+        this.stability = 100;
         this.color = switch (nationType) {
             case ROME -> Color.RED;
             case BAVARIA -> Color.CYAN;
@@ -55,6 +59,53 @@ public class Nation {
         if (cell.getOwner() == this) {
             cell.setOwner(null);
         }
+    }
+
+    // --- Логика вассалитета ---
+
+    public boolean isVassal() {
+        return master != null;
+    }
+
+    public void addVassal(Nation vassal) {
+        if (vassal != null && vassal != this && !vassals.contains(vassal)) {
+            vassals.add(vassal);
+            vassal.setMaster(this);
+        }
+    }
+
+    public void removeVassal(Nation vassal) {
+        if (vassals.remove(vassal)) {
+            vassal.setMaster(null);
+        }
+    }
+
+    public Nation getMaster() {
+        return master;
+    }
+
+    public void setMaster(Nation master) {
+        this.master = master;
+    }
+
+    public List<Nation> getVassals() {
+        return Collections.unmodifiableList(vassals);
+    }
+
+    public int getStability() {
+        return stability;
+    }
+
+    public void setStability(int stability) {
+        this.stability = Math.max(0, Math.min(100, stability));
+    }
+
+    public int getLibertyDesire() {
+        return libertyDesire;
+    }
+
+    public void setLibertyDesire(int libertyDesire) {
+        this.libertyDesire = Math.max(0, Math.min(100, libertyDesire));
     }
 
     public Set<Cell> getOwnedCells() {
@@ -101,16 +152,16 @@ public class Nation {
         return state;
     }
 
+    public void setState(SituationState state) {
+        this.state = state;
+    }
+
     public long getPower() {
         return power;
     }
 
     public long getGold() {
         return gold;
-    }
-
-    public void setState(SituationState state) {
-        this.state = state;
     }
 
     public int getShipCount() {
