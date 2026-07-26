@@ -62,15 +62,7 @@ public class World {
 
     public static void collectEconomy() {
         for (Nation nation : nations) {
-            nation.resetTotalCells();
-        }
-
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                Cell cell = cells[y][x];
-                Nation owner = cell.getOwner();
-                if (owner == null) continue;
-
+            for (Cell cell : nation.getOwnedCells()) {
                 long income = switch (cell.getType()) {
                     case CAPITAL -> 8;
                     case LAND -> 3;
@@ -79,8 +71,7 @@ public class World {
                 };
 
                 if (income > 0) {
-                    owner.addGold(income);
-                    owner.incrementTotalCells();
+                    nation.addGold(income);
                 }
             }
         }
@@ -118,26 +109,19 @@ public class World {
     }
 
     private static boolean hasCapital(Nation nation) {
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                Cell cell = cells[y][x];
-                if (cell.getOwner() == nation && cell.isCapital()) {
-                    return true;
-                }
+        for (Cell cell : nation.getOwnedCells()) {
+            if (cell.isCapital()) {
+                return true;
             }
         }
         return false;
     }
 
     private static void eliminateNation(Nation nation) {
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                Cell cell = cells[y][x];
-                if (cell.getOwner() == nation) {
-                    cell.setOwner(null);
-                    cell.setType(CellType.NONE);
-                }
-            }
+        List<Cell> cellsToClear = new ArrayList<>(nation.getOwnedCells());
+        for (Cell cell : cellsToClear) {
+            cell.setType(CellType.NONE);
+            claimCell(cell, null);
         }
     }
 
@@ -159,14 +143,14 @@ public class World {
 
         if (target.isGround() && !target.isOwned()) {
             if (attacker.spendGold(cost)) {
-                target.setOwner(attacker);
+                claimCell(target, attacker);
                 target.setType(CellType.LAND);
                 attacker.addPower(1);
             }
         } else if (target.isOwned() && target.getOwner() != attacker && !target.isShip()) {
             if (attacker.getState() == SituationState.WAR && rand.nextInt(100) < chance) {
                 if (attacker.spendGold(cost)) {
-                    target.setOwner(attacker);
+                    claimCell(target, attacker);
                     if (!target.isCapital()) {
                         target.setType(CellType.LAND);
                     }
@@ -176,7 +160,7 @@ public class World {
         } else if (target.isWater() && !target.isOwned()) {
             if (rand.nextInt(100) < 8 && attacker.spendGold(4)) {
                 if (attacker.getShipCount() < 10) {
-                    target.setOwner(attacker);
+                    claimCell(target, attacker);
                     target.setType(CellType.SHIP);
                     attacker.incrementShipCount();
                 }
@@ -194,24 +178,24 @@ public class World {
 
         if ((target.isWater() || target.isGround()) && !target.isOwned()) {
             if (attacker.spendGold(3)) {
-                target.setOwner(attacker);
+                claimCell(target, attacker);
                 if (target.isWater()) {
                     target.setType(CellType.SHIP);
                 } else {
                     target.setType(CellType.LAND);
                     attacker.decrementShipCount();
                 }
-                current.setOwner(null);
+                claimCell(current, null);
                 current.setType(CellType.NONE);
             }
         } else if (target.isOwned() && target.getOwner() != attacker && !target.isShip()) {
             if (attacker.getState() == SituationState.WAR && rand.nextInt(100) < 30) {
                 if (attacker.spendGold(8)) {
-                    target.setOwner(attacker);
+                    claimCell(target, attacker);
                     if (!target.isCapital()) {
                         target.setType(CellType.LAND);
                     }
-                    current.setOwner(null);
+                    claimCell(current, null);
                     current.setType(CellType.NONE);
                     attacker.decrementShipCount();
                     attacker.addPower(3);
@@ -230,6 +214,16 @@ public class World {
                     nation.setState(SituationState.PEACE);
                 }
             }
+        }
+    }
+
+    public static void claimCell(Cell cell, Nation newOwner) {
+        Nation oldOwner = cell.getOwner();
+        if (oldOwner != null) {
+            oldOwner.removeCell(cell);
+        }
+        if (newOwner != null) {
+            newOwner.addCell(cell);
         }
     }
 

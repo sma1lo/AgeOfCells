@@ -1,21 +1,24 @@
 package com.aoc;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 public class Nation {
     private String name;
     private NationType nationType;
     private long power;
     private long gold;
-    private long totalCells;
     private Color color;
     protected SituationState state;
     private int shipCount = 0;
+    private final Set<Cell> ownedCells = new HashSet<>();
 
     public Nation(String name, NationType nationType, long startingPower) {
         this.name = name;
         this.nationType = nationType;
         this.power = startingPower;
         this.gold = startingPower;
-        this.totalCells = 0;
         this.state = SituationState.PEACE;
         this.color = switch (nationType) {
             case ROME -> Color.RED;
@@ -37,6 +40,26 @@ public class Nation {
             case PERSIA -> Color.TEAL;
             default -> Color.WHITE;
         };
+    }
+
+    public void addCell(Cell cell) {
+        ownedCells.add(cell);
+        cell.setOwner(this);
+    }
+
+    public void removeCell(Cell cell) {
+        ownedCells.remove(cell);
+        if (cell.getOwner() == this) {
+            cell.setOwner(null);
+        }
+    }
+
+    public Set<Cell> getOwnedCells() {
+        return Collections.unmodifiableSet(ownedCells);
+    }
+
+    public long getTotalCells() {
+        return ownedCells.size();
     }
 
     public void addGold(long amount) {
@@ -63,14 +86,6 @@ public class Nation {
         }
     }
 
-    public void resetTotalCells() {
-        this.totalCells = 0;
-    }
-
-    public void incrementTotalCells() {
-        this.totalCells++;
-    }
-
     public String getName() {
         return name;
     }
@@ -89,10 +104,6 @@ public class Nation {
 
     public long getGold() {
         return gold;
-    }
-
-    public long getTotalCells() {
-        return totalCells;
     }
 
     public void setState(SituationState state) {

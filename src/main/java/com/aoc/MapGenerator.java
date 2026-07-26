@@ -34,7 +34,7 @@ public class MapGenerator {
                 int y = rand.nextInt(height);
                 Cell cell = cells[y][x];
                 if (cell.isGround() && !cell.isOwned()) {
-                    cell.setOwner(nation);
+                    World.claimCell(cell, nation);
                     cell.setType(CellType.CAPITAL);
                     break;
                 }
