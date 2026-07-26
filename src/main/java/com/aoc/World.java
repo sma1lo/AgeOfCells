@@ -148,6 +148,10 @@ public class World {
                 attacker.addPower(1);
             }
         } else if (target.isOwned() && target.getOwner() != attacker && !target.isShip()) {
+            if (attacker.getState() == SituationState.UNION && target.getOwner().getState() == SituationState.UNION) {
+                return;
+            }
+
             if (attacker.getState() == SituationState.WAR && rand.nextInt(100) < chance) {
                 if (attacker.spendGold(cost)) {
                     claimCell(target, attacker);
@@ -208,8 +212,17 @@ public class World {
         int tick = Time.getCurrentTick();
         if (tick % 35 == 0) {
             for (Nation nation : nations) {
-                if (rand.nextInt(100) < 55) {
+                int chance = rand.nextInt(100);
+
+                if (chance < 55) {
                     nation.setState(SituationState.WAR);
+                } else if (chance < 80 && nations.size() > 1) {
+                    Nation partner;
+                    do {
+                        partner = nations.get(rand.nextInt(nations.size()));
+                    } while (partner == nation);
+                    nation.setState(SituationState.UNION);
+                    partner.setState(SituationState.UNION);
                 } else {
                     nation.setState(SituationState.PEACE);
                 }
