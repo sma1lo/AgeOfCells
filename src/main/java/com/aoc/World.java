@@ -6,70 +6,27 @@ import java.util.List;
 import java.util.Random;
 
 public class World {
-    static final int WIDTH = 205;
-    static final int HEIGHT = 53;
-    static Random rand = new Random();
+    public static final int WIDTH = 205;
+    public static final int HEIGHT = 53;
 
-    static Cell[][] cells = new Cell[HEIGHT][WIDTH];
-    static List<Nation> nations = new ArrayList<>();
-    private static final StringBuilder gridBuilder = new StringBuilder(WIDTH * HEIGHT * 15);
+    private static final Random rand = new Random();
+    private static final Cell[][] cells = new Cell[HEIGHT][WIDTH];
+    private static final List<Nation> nations = new ArrayList<>();
+
+    private static final MapGenerator generator = new MapGenerator();
+    private static final WorldRenderer renderer = new WorldRenderer(WIDTH, HEIGHT);
 
     public static void init() {
-        fillWater();
-        fillGround();
-        for (int i = 0; i < 4; i++) {
-            smoothMap();
-        }
-        fillNation();
+        generator.generateTerrain(cells, WIDTH, HEIGHT);
+        fillNations();
+        generator.spawnCapitals(cells, nations, WIDTH, HEIGHT);
     }
 
     public static void generateGrid() {
-        gridBuilder.setLength(0);
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                Cell cell = cells[y][x];
-
-                if (cell.isWater() && !cell.isOwned()) {
-                    gridBuilder.append(Color.BLUE).append("~").append(Color.RESET);
-                } else if (cell.isOwned()) {
-                    Nation n = cell.getOwner();
-                    String letter = n.getName().substring(0, 1);
-
-                    if (cell.isCapital()) {
-                        gridBuilder.append(n.getColor()).append(letter.toUpperCase()).append(Color.RESET);
-                    } else if (cell.isLand()) {
-                        gridBuilder.append(n.getColor()).append(letter.toLowerCase()).append(Color.RESET);
-                    } else if (cell.isShip()) {
-                        gridBuilder.append(n.getColor()).append("^").append(Color.RESET);
-                    }
-                } else {
-                    gridBuilder.append("0");
-                }
-            }
-            gridBuilder.append("\n");
-        }
-        System.out.println(gridBuilder.toString());
+        renderer.render(cells, WIDTH, HEIGHT);
     }
 
-    private static void fillWater() {
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                cells[y][x] = new Cell(TerrainType.WATER);
-            }
-        }
-    }
-
-    private static void fillGround() {
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                if (rand.nextInt(100) < 50) {
-                    cells[y][x].setTerrain(TerrainType.GROUND);
-                }
-            }
-        }
-    }
-
-    public static void fillNation() {
+    private static void fillNations() {
         nations.clear();
         nations.add(new Nation("Rome", NationType.ROME, rand.nextInt(100) + 50));
         nations.add(new Nation("Bavaria", NationType.BAVARIA, rand.nextInt(100) + 50));
@@ -88,24 +45,19 @@ public class World {
         nations.add(new Nation("Denmark", NationType.DENMARK, rand.nextInt(100) + 50));
         nations.add(new Nation("Netherlands", NationType.NETHERLANDS, rand.nextInt(100) + 50));
         nations.add(new Nation("Persia", NationType.PERSIA, rand.nextInt(100) + 50));
-        for (Nation nation : nations) {
-            spawnCapital(nation);
-        }
     }
 
-    private static void spawnCapital(Nation nation) {
-        int attempts = 0;
-        while (attempts < 10000) {
-            int x = rand.nextInt(WIDTH);
-            int y = rand.nextInt(HEIGHT);
-            Cell cell = cells[y][x];
-            if (cell.isGround() && !cell.isOwned()) {
-                cell.setOwner(nation);
-                cell.setType(CellType.CAPITAL);
-                break;
+    public static void update() {
+        collectEconomy();
+        if (Time.getCurrentTick() % 4 == 0) {
+            for (Nation nation : nations) {
+                nation.strengthenFromGold();
             }
-            attempts++;
         }
+
+        rotateState();
+        check();
+        checkCapitals();
     }
 
     public static void collectEconomy() {
@@ -268,43 +220,24 @@ public class World {
         }
     }
 
-    private static int countGroundNeighbors(int cx, int cy) {
-        int count = 0;
-        for (int yMod = -1; yMod <= 1; yMod++) {
-            for (int xMod = -1; xMod <= 1; xMod++) {
-                if (xMod == 0 && yMod == 0) continue;
-                int nx = cx + xMod;
-                int ny = cy + yMod;
-                if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
-                    if (cells[ny][nx].isGround()) {
-                        count++;
-                    }
+    private static void rotateState() {
+        int tick = Time.getCurrentTick();
+        if (tick % 35 == 0) {
+            for (Nation nation : nations) {
+                if (rand.nextInt(100) < 55) {
+                    nation.setState(SituationState.WAR);
+                } else {
+                    nation.setState(SituationState.PEACE);
                 }
             }
         }
-        return count;
     }
 
-    public static void smoothMap() {
-        TerrainType[][] buffer = new TerrainType[HEIGHT][WIDTH];
+    public static Cell[][] getCells() {
+        return cells;
+    }
 
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                int groundNeighbors = countGroundNeighbors(x, y);
-                if (groundNeighbors > 4) {
-                    buffer[y][x] = TerrainType.GROUND;
-                } else if (groundNeighbors < 4) {
-                    buffer[y][x] = TerrainType.WATER;
-                } else {
-                    buffer[y][x] = cells[y][x].getTerrain();
-                }
-            }
-        }
-
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                cells[y][x].setTerrain(buffer[y][x]);
-            }
-        }
+    public static List<Nation> getNations() {
+        return nations;
     }
 }

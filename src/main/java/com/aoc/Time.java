@@ -10,5 +10,4 @@ public class Time {
     public static int getCurrentTick() {
         return currentTick;
     }
-
 }
