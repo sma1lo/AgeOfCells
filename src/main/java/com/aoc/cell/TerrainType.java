@@ -1,7 +1,6 @@
-package com.aoc;
+package com.aoc.cell;
 
 public enum TerrainType {
     GROUND,
     WATER,
-    NATION_CELL;
 }

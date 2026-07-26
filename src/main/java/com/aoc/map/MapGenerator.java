@@ -1,10 +1,15 @@
-package com.aoc;
+package com.aoc.map;
+
+import com.aoc.World;
+import com.aoc.cell.Cell;
+import com.aoc.cell.CellType;
+import com.aoc.config.Config;
+import com.aoc.nation.Nation;
+import com.aoc.cell.TerrainType;
 
 import java.util.List;
-import java.util.Random;
 
 public class MapGenerator {
-    private final Random rand = new Random();
 
     public void generateTerrain(Cell[][] cells, int width, int height) {
         for (int y = 0; y < height; y++) {
@@ -15,7 +20,7 @@ public class MapGenerator {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if (rand.nextInt(100) < 50) {
+                if (Config.RAND.nextInt(100) < 50) {
                     cells[y][x].setTerrain(TerrainType.GROUND);
                 }
             }
@@ -30,8 +35,8 @@ public class MapGenerator {
         for (Nation nation : nations) {
             int attempts = 0;
             while (attempts < 10000) {
-                int x = rand.nextInt(width);
-                int y = rand.nextInt(height);
+                int x = Config.RAND.nextInt(width);
+                int y = Config.RAND.nextInt(height);
                 Cell cell = cells[y][x];
                 if (cell.isGround() && !cell.isOwned()) {
                     World.claimCell(cell, nation);
@@ -49,9 +54,9 @@ public class MapGenerator {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int groundNeighbors = countGroundNeighbors(cells, x, y, width, height);
-                if (groundNeighbors > 4) {
+                if (groundNeighbors > Config.SMOOTH) {
                     buffer[y][x] = TerrainType.GROUND;
-                } else if (groundNeighbors < 4) {
+                } else if (groundNeighbors < Config.SMOOTH) {
                     buffer[y][x] = TerrainType.WATER;
                 } else {
                     buffer[y][x] = cells[y][x].getTerrain();

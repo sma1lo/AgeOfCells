@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.nation;
 
 public enum SituationState {
     WAR,

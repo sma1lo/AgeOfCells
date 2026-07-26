@@ -1,4 +1,8 @@
-package com.aoc;
+package com.aoc.render;
+
+import com.aoc.cell.Cell;
+import com.aoc.nation.Nation;
+import com.aoc.util.Color;
 
 public class WorldRenderer {
     private final StringBuilder gridBuilder;

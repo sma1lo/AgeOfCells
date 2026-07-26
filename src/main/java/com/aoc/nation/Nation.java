@@ -1,4 +1,7 @@
-package com.aoc;
+package com.aoc.nation;
+
+import com.aoc.cell.Cell;
+import com.aoc.util.Color;
 
 import java.util.Collections;
 import java.util.HashSet;

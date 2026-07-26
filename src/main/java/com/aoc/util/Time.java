@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.util;
 
 public class Time {
     static int currentTick = 0;

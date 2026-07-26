@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.util;
 
 public enum Color {
     RESET("\u001B[0m"),

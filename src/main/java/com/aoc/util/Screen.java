@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.util;
 
 public class Screen {
     public static void clear() {

@@ -1,4 +1,6 @@
-package com.aoc;
+package com.aoc.cell;
+
+import com.aoc.nation.Nation;
 
 public class Cell {
     private TerrainType terrain;

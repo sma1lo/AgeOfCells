@@ -1,23 +1,22 @@
 package com.aoc;
 
-import java.util.Random;
+import com.aoc.config.Config;
+import com.aoc.util.Screen;
+import com.aoc.util.Time;
 
 public class GameLoop {
-    private static final Random rand = new Random();
-
     public static void run() throws InterruptedException {
-        World world = new World();
-        world.init();
+        World.init();
 
         while (true) {
             Time.tick();
-            world.update();
+            World.update();
 
             Screen.clear();
-            System.out.println("Game tick: " + Time.getCurrentTick() + " | Active Nations: " + world.getNations().size());
-            world.generateGrid();
+            System.out.println("Game tick: " + Time.getCurrentTick() + " | Active Nations: " + World.getNations().size());
+            World.generateGrid();
 
-            Thread.sleep(300);
+            Thread.sleep(Config.TICK_DELAY_MS);
         }
     }
 }

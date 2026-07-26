@@ -1,4 +1,4 @@
-package com.aoc;
+package com.aoc.cell;
 
 public enum CellType {
     NONE,
