@@ -188,14 +188,14 @@ public class World {
         if ((target.isWater() || target.isGround()) && !target.isOwned()) {
             if (attacker.spendGold(3)) {
                 claimCell(target, attacker);
+
                 if (target.isWater()) {
                     target.setType(CellType.SHIP);
+                    attacker.incrementShipCount();
                 } else {
                     target.setType(CellType.LAND);
-                    attacker.decrementShipCount();
                 }
                 claimCell(current, null);
-                current.setType(CellType.NONE);
             }
         } else if (target.isOwned() && target.getOwner() != attacker && !target.isShip()) {
             if (attacker.getState() == SituationState.WAR && Config.RAND.nextInt(100) < 30) {
@@ -205,8 +205,6 @@ public class World {
                         target.setType(CellType.LAND);
                     }
                     claimCell(current, null);
-                    current.setType(CellType.NONE);
-                    attacker.decrementShipCount();
                     attacker.addPower(3);
                 }
             }
