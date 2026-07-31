@@ -3,6 +3,7 @@ package com.aoc.diplomacy;
 import com.aoc.config.Config;
 import com.aoc.nation.Nation;
 import com.aoc.nation.SituationState;
+import com.aoc.util.Rng;
 
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class DiplomacyManager {
             vassal.setLibertyDesire(vassal.getLibertyDesire() - 1);
         }
 
-        if (vassal.getLibertyDesire() >= 80 && Config.RAND.nextInt(100) < 15) {
+        if (vassal.getLibertyDesire() >= 80 && Rng.nextInt(100) < 15) {
             triggerIndependenceWar(vassal);
         }
     }

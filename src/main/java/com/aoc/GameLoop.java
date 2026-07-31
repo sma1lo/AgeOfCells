@@ -16,7 +16,7 @@ public class GameLoop {
             System.out.println("Game tick: " + Time.getCurrentTick() + " | Active Nations: " + World.getNations().size());
             World.generateGrid();
 
-            Thread.sleep(Config.TICK_DELAY_MS);
+            Thread.sleep(Config.get().tickDelayMs());
         }
     }
 }

@@ -1,16 +1,26 @@
 package com.aoc.config;
 
-import java.util.Random;
+import com.aoc.util.Loader;
+import java.util.Map;
 
-public class Config {
-    public static final int WIDTH = 205;
-    public static final int HEIGHT = 53;
+public record Config(
+    int width,
+    int height,
+    int smooth,
+    int tickDelayMs
+) {
+    private static Config instance;
+    public static void load(String path) {
+        Map<String, Object> rawData = Loader.load(path);
+        instance = new Config(
+            (int) rawData.get("width"),
+            (int) rawData.get("height"),
+            (int) rawData.get("smooth"),
+            (int) rawData.get("tickDelayMs")
+        );
+    }
 
-    public static final boolean USE_RANDOM_SEED = true;
-    public static final long SEED = 42L;
-    public static final Random RAND = USE_RANDOM_SEED ? new Random() : new Random(SEED);
-
-    public static final int SMOOTH = 4;
-
-    public static final int TICK_DELAY_MS = 300;
+    public static Config get() {
+        return instance;
+    }
 }

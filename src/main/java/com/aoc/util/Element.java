@@ -1,7 +1,5 @@
 package com.aoc.util;
 
-import com.aoc.config.Config;
-
 import java.util.List;
 
 public class Element {
@@ -9,6 +7,6 @@ public class Element {
         if (list == null || list.isEmpty()) {
             return null;
         }
-        return list.get(Config.RAND.nextInt(list.size()));
+        return list.get(Rng.nextInt(list.size()));
     }
 }
