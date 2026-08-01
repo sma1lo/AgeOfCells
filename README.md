@@ -51,8 +51,9 @@ AgeOfCells/
 │               ├── Color.java
 │               ├── Element.java
 │               ├── Screen.java
-│               └── Time.java
-│
+│               ├── Time.java
+│               ├── Loader.java
+│               └── Rng.java
 ├── assets/
 │   └── preview.png
 ├── .gitignore
