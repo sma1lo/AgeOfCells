@@ -10,14 +10,29 @@ An interactive, CLI-based geopolitical world simulation engine written in Java. 
 
 ## Features
 
-* **Nation Expansion & Colonization:** Nations automatically spread across procedural land tiles, expand maritime routes via naval units, and establish new territories.
-* **Economic Management:** Dynamic gold accumulation based on active land, sea, and capital ownership, driving military capability and growth.
-* **Diplomatic State Transitions:** Dynamic real-time transitions between peace, active war, alliances, and non-aggression pacts based on territorial density and border conflicts.
-* **Master-Vassal & Hegemony Systems:**
-    * Subjugate defeated nations upon capital conquest rather than complete elimination.
-    * Collect recurring tribute taxes from sub-states to finance global expansion.
-    * Dynamic **Liberty Desire** tracking: Vassals monitor their master's military health and launch independence wars when opportunity arises.
-* **Real-time Terminal Visualization:** Custom ASCII/ANSI rendering engine for displaying borders, movement, state changes, and global history logs directly in the CLI.
+* **Nation Expansion:** Nations expand over land and build limited fleets (max 7 ships).
+* **Resources:** Gold, Iron and Coal deposits give significant economic bonuses.
+* **Diplomacy:** Peace, War and temporary Unions. Capital capture can turn nations into vassals.
+* **Vassal System:** Masters collect tribute. Vassals have Liberty Desire and can rebel.
+* **Economy:** Income from land, capitals, ships and resources.
+
+---
+
+## Map Legend
+
+| Symbol            | Meaning                  |
+|-------------------|--------------------------|
+| `A`               | Capital                  |
+| `a`               | Controlled land          |
+| `^`               | Ship                     |
+| `~`               | Water                    |
+| `$`               | Gold                     |
+| `#`               | Iron                     |
+| `*`               | Coal                     |
+| `0`               | Unclaimed ground         |
+
+Colored symbols belong to different nations.  
+Uppercase letter = capital of the nation.
 
 ---
 
