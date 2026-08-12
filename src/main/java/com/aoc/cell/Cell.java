@@ -13,21 +13,38 @@ public class Cell {
         this.type = CellType.NONE;
     }
 
-    public TerrainType getTerrain() { return terrain; }
-    public void setTerrain(TerrainType terrain) { this.terrain = terrain; }
+    public TerrainType getTerrain() {
+        return terrain;
+    }
 
-    public Nation getOwner() { return owner; }
-    public void setOwner(Nation owner) { this.owner = owner; }
+    public void setTerrain(TerrainType terrain) {
+        this.terrain = terrain;
+    }
 
-    public CellType getType() { return type; }
-    public void setType(CellType type) { this.type = type; }
+    public Nation getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Nation owner) {
+        this.owner = owner;
+    }
+
+    public CellType getType() {
+        return type;
+    }
+
+    public void setType(CellType type) {
+        this.type = type;
+    }
 
     public boolean isWater() {
         return terrain == TerrainType.WATER;
     }
 
     public boolean isGround() {
-        return terrain == TerrainType.GROUND;
+        return terrain == TerrainType.GROUND || terrain == TerrainType.GOLD
+            || terrain == TerrainType.IRON
+            || terrain == TerrainType.COAL;
     }
 
     public boolean isOwned() {

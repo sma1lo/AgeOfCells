@@ -30,12 +30,29 @@ public class MapGenerator {
         for (int i = 0; i < 4; i++) {
             smooth(cells, width, height);
         }
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (cells[y][x].getTerrain() == TerrainType.GROUND) {
+
+                    int roll = Rng.RAND.nextInt(1000);
+
+                    if (roll < 3) {
+                        cells[y][x].setTerrain(TerrainType.GOLD);
+                    } else if (roll < 5) {
+                        cells[y][x].setTerrain(TerrainType.IRON);
+                    } else if (roll < 10) {
+                        cells[y][x].setTerrain(TerrainType.COAL);
+                    }
+                }
+            }
+        }
     }
 
     public void spawnCapitals(Cell[][] cells, List<Nation> nations, int width, int height) {
         for (Nation nation : nations) {
             int attempts = 0;
-            while (attempts < 10000) {
+            while (attempts < 100) {
                 int x = Rng.nextInt(width);
                 int y = Rng.nextInt(height);
                 Cell cell = cells[y][x];

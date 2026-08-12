@@ -1,6 +1,5 @@
 package com.aoc.diplomacy;
 
-import com.aoc.config.Config;
 import com.aoc.nation.Nation;
 import com.aoc.nation.SituationState;
 import com.aoc.util.Rng;

@@ -10,7 +10,6 @@ public class Nation {
     private long power;
     private long gold;
     protected SituationState state;
-    private int shipCount = 0;
     private int stability = 100;
     private int libertyDesire = 0;
     private NationType nationType;
@@ -132,7 +131,7 @@ public class Nation {
 
     public void strengthenFromGold() {
         if (gold > 15) {
-            long converted = gold / 12;
+            long converted = gold / 20;
             addPower(converted);
             gold -= converted;
         }
@@ -160,17 +159,5 @@ public class Nation {
 
     public long getGold() {
         return gold;
-    }
-
-    public int getShipCount() {
-        return shipCount;
-    }
-
-    public void incrementShipCount() {
-        this.shipCount++;
-    }
-
-    public void decrementShipCount() {
-        if (shipCount > 0) this.shipCount--;
     }
 }
