@@ -34,8 +34,9 @@ An interactive, CLI-based geopolitical world simulation engine written in Java. 
 | `*`    | Coal             |
 | `0`    | Unclaimed ground |
 
-Colored symbols belong to different nations.  
-Uppercase letter = capital of the nation.
+> [!NOTE]
+>  Colored symbols belong to active sovereign nations. White symbols represent neutral elements.
+
 
 ---
 
@@ -44,36 +45,42 @@ Uppercase letter = capital of the nation.
 ```
 AgeOfCells/
 ├── src/
-│   └── com/
-│       └── aoc/
-│           ├── Launcher.java
-│           ├── World.java
-│           ├── GameLoop.java
-│           ├── cell/
-│           │   ├── Cell.java
-│           │   ├── CellType.java
-│           │   └── TerrainType.java
-│           ├── diplomacy/
-│           │   └── DiplomacyManager.java
-│           ├── map/
-│           │   └── MapGenerator.java
-│           ├── nation/
-│           │   ├── Nation.java
-│           │   ├── NationType.java
-│           │   └── SituationState.java
-│           ├── render/
-│           │   └── WorldRenderer.java
-│           ├── config/
-│           │   └── Config.java
-│           └── util/
-│               ├── Color.java
-│               ├── Element.java
-│               ├── Screen.java
-│               ├── Time.java
-│               ├── Loader.java
-│               └── Rng.java
+│   └── main/
+│       └── java/
+│           └── com/
+│               └── aoc/
+│                   ├── Launcher.java
+│                   ├── World.java
+│                   ├── GameLoop.java
+│                   ├── cell/
+│                   │   ├── Cell.java
+│                   │   ├── CellType.java
+│                   │   └── TerrainType.java
+│                   ├── diplomacy/
+│                   │   └── DiplomacyManager.java
+│                   ├── map/
+│                   │   └── MapGenerator.java
+│                   ├── nation/
+│                   │   ├── Nation.java
+│                   │   ├── NationType.java
+│                   │   └── SituationState.java
+│                   ├── render/
+│                   │   └── WorldRenderer.java
+│                   ├── config/
+│                   │   └── Config.java
+│                   └── util/
+│                       ├── Color.java
+│                       ├── Element.java
+│                       ├── Screen.java
+│                       ├── Time.java
+│                       ├── Loader.java
+│                       └── Rng.java
 ├── assets/
 │   └── preview.png
+├── build.gradle
+├── gradlew
+├── gradlew.bat
+├── settings.gradle
 ├── .gitignore
 ├── LICENSE
 └── README.md
@@ -92,15 +99,33 @@ AgeOfCells/
 ### Installation & Run
 
 1. **Clone the repository:**
+
+    **Linux / macOS:**
+   ```bash
+   git clone https://github.com/sma1lo/AgeOfCells.git && cd AgeOfCells
+   ```
+    **Windows:**
+   ```bash
+   cd Desktop
+   ```
    ```bash
    git clone https://github.com/sma1lo/AgeOfCells.git
+   ```
+   ```bash
    cd AgeOfCells
    ```
-2. **Compile the project:**
+2. **Build the executable JAR file:** 
+
+    **Linux / macOS:**
    ```bash
-   javac -d bin src/com/aoc/*.java src/com/aoc/*/*.java
+   chmod +x gradlew && ./gradlew build
    ```
+   **Windows:**
+   ```bash
+   .\gradlew.bat build
+   ```
+   
 3. **Run the simulation:**
    ```bash
-   java -cp bin com.aoc.Launcher
+   java -jar build/libs/AgeOfCells-1.0-SNAPSHOT.jar
    ```
