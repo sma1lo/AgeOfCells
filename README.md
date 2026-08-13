@@ -20,16 +20,19 @@ An interactive, CLI-based geopolitical world simulation engine written in Java. 
 
 ## Map Legend
 
-| Symbol            | Meaning                  |
-|-------------------|--------------------------|
-| `A`               | Capital                  |
-| `a`               | Controlled land          |
-| `^`               | Ship                     |
-| `~`               | Water                    |
-| `$`               | Gold                     |
-| `#`               | Iron                     |
-| `*`               | Coal                     |
-| `0`               | Unclaimed ground         |
+| Symbol | Meaning          |
+|--------|------------------|
+| `A`    | Capital          |
+| `a`    | Controlled land  |
+| `^`    | Ship             |
+| `~`    | Water            |
+| `C`    | Castle           |
+| `T`    | Town             |
+| `v`    | Village          |
+| `$`    | Gold             |
+| `#`    | Iron             |
+| `*`    | Coal             |
+| `0`    | Unclaimed ground |
 
 Colored symbols belong to different nations.  
 Uppercase letter = capital of the nation.

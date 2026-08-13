@@ -1,5 +1,7 @@
 package com.aoc.diplomacy;
 
+import com.aoc.cell.Cell;
+import com.aoc.cell.CellType;
 import com.aoc.nation.Nation;
 import com.aoc.nation.SituationState;
 import com.aoc.util.Rng;
@@ -61,6 +63,17 @@ public class DiplomacyManager {
             nation.setStability(nation.getStability() - 1);
         } else if (nation.getStability() < 100) {
             nation.setStability(nation.getStability() + 1);
+        }
+
+        int castleBonus = 0;
+        for (Cell cell : nation.getOwnedCells()) {
+            if (cell.getType() == CellType.CASTLE) {
+                castleBonus++;
+            }
+        }
+
+        if (castleBonus > 0 && Rng.nextInt(3) == 0) {
+            nation.setStability(nation.getStability() + castleBonus);
         }
     }
 

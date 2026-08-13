@@ -1,6 +1,7 @@
 package com.aoc.render;
 
 import com.aoc.cell.Cell;
+import com.aoc.cell.CellType;
 import com.aoc.cell.TerrainType;
 import com.aoc.nation.Nation;
 import com.aoc.util.Color;
@@ -33,17 +34,27 @@ public class WorldRenderer {
                     Nation n = cell.getOwner();
 
                     if (cell.isCapital()) {
-                        gridBuilder.append(n.getColor()).append(n.getName().substring(0, 1).toUpperCase()).append(Color.RESET);
+                        gridBuilder.append(n.getColor())
+                            .append(n.getName().substring(0, 1).toUpperCase())
+                            .append(Color.RESET);
+                    } else if (cell.isCastle()) {
+                        gridBuilder.append(n.getColor()).append("C").append(Color.RESET);
+                    } else if (cell.isTown()) {
+                        gridBuilder.append(n.getColor()).append("T").append(Color.RESET);
+                    } else if (cell.isVillage()) {
+                        gridBuilder.append(n.getColor()).append("v").append(Color.RESET);
+                    } else if (cell.isShip()) {
+                        gridBuilder.append(n.getColor()).append("^").append(Color.RESET);
                     } else if (cell.isLand()) {
                         if (cell.getTerrain() == TerrainType.GOLD ||
                             cell.getTerrain() == TerrainType.IRON ||
                             cell.getTerrain() == TerrainType.COAL) {
                             gridBuilder.append(n.getColor()).append(symbol).append(Color.RESET);
                         } else {
-                            gridBuilder.append(n.getColor()).append(n.getName().substring(0, 1).toLowerCase()).append(Color.RESET);
+                            gridBuilder.append(n.getColor())
+                                .append(n.getName().substring(0, 1).toLowerCase())
+                                .append(Color.RESET);
                         }
-                    } else if (cell.isShip()) {
-                        gridBuilder.append(n.getColor()).append("^").append(Color.RESET);
                     }
                 } else {
                     if (cell.isWater()) {

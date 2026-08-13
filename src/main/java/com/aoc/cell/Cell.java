@@ -21,6 +21,14 @@ public class Cell {
         this.terrain = terrain;
     }
 
+    public CellType getCellType() {
+        return type;
+    }
+
+    public void setCellType(CellType type) {
+        this.type = type;
+    }
+
     public Nation getOwner() {
         return owner;
     }
@@ -60,6 +68,19 @@ public class Cell {
     }
 
     public boolean isLand() {
-        return type == CellType.LAND;
+        return type == CellType.LAND  || type == CellType.VILLAGE ||
+            type == CellType.TOWN || type == CellType.CASTLE;
+    }
+
+    public boolean isVillage() {
+        return type == CellType.VILLAGE;
+    }
+
+    public boolean isTown() {
+        return type == CellType.TOWN;
+    }
+
+    public boolean isCastle() {
+        return type == CellType.CASTLE;
     }
 }

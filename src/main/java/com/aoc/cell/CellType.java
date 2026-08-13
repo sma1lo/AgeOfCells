@@ -4,5 +4,8 @@ public enum CellType {
     NONE,
     CAPITAL,
     LAND,
-    SHIP;
+    SHIP,
+    CASTLE,
+    TOWN,
+    VILLAGE,
 }

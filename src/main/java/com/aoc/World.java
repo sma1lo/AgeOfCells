@@ -99,6 +99,9 @@ public class World {
                     case CAPITAL -> 4;
                     case LAND -> 1;
                     case SHIP -> 1;
+                    case CASTLE -> 2;
+                    case TOWN -> 4;
+                    case VILLAGE -> 2;
                     default -> 0;
                 };
 
@@ -127,11 +130,18 @@ public class World {
                         tryExpand(x, y, owner);
                     }
                 }
+
                 if (owner != null && cell.isShip()) {
                     if (Rng.nextInt(100) < 20) {
                         trySail(x, y, owner);
                     }
                 }
+            }
+        }
+
+        if (Time.getCurrentTick() % 10 == 0) {
+            for (Nation nation : nations) {
+                tryBuilding(nation);
             }
         }
     }
@@ -302,6 +312,64 @@ public class World {
                 }
             }
         }
+    }
+
+    private static int countBuildings(Nation nation, CellType type) {
+        int count = 0;
+        for (Cell cell : nation.getOwnedCells()) {
+            if (cell.getType() == type) count++;
+        }
+        return count;
+    }
+
+    private static void tryBuilding(Nation builder) {
+        List<Cell> lands = new ArrayList<>();
+
+        for (Cell cell : builder.getOwnedCells()) {
+            if (cell.isLand()
+                || cell.getType() == CellType.VILLAGE
+                || cell.getType() == CellType.TOWN) {
+                lands.add(cell);
+            }
+        }
+
+        if (lands.isEmpty()) return;
+
+        Cell cell = Element.getRandomElement(lands);
+
+        int cost;
+        CellType next;
+        int limit;
+
+        switch (cell.getType()) {
+            case LAND -> {
+                cost = 300;
+                next = CellType.VILLAGE;
+                limit = 24;
+            }
+
+            case VILLAGE -> {
+                cost = 500;
+                next = CellType.TOWN;
+                limit = 12;
+            }
+
+            case TOWN -> {
+                cost = 1000;
+                next = CellType.CASTLE;
+                limit = 5;
+            }
+
+            default -> {
+                return;
+            }
+        }
+
+        if (countBuildings(builder, next) >= limit) return;
+        if (builder.getGold() < cost) return;
+
+        builder.spendGold(cost);
+        cell.setType(next);
     }
 
     private static void rotateState() {
