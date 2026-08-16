@@ -12,44 +12,49 @@ import java.util.List;
 
 public class MapGenerator {
 
-    public void generateTerrain(Cell[][] cells, int width, int height) {
+    public void generateTerrain(World world, Cell[][] cells, int width, int height) {
+        TerrainType[][] terrainMap = new TerrainType[height][width];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                cells[y][x] = new Cell(TerrainType.WATER);
+                terrainMap[y][x] = TerrainType.WATER;
             }
         }
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if (Rng.RAND.nextInt(100) < 50) {
-                    cells[y][x].setTerrain(TerrainType.GROUND);
+                if (Rng.nextInt(100) < 50) {
+                    terrainMap[y][x] = TerrainType.GROUND;
                 }
             }
         }
 
         for (int i = 0; i < 4; i++) {
-            smooth(cells, width, height);
+            terrainMap = smooth(terrainMap, width, height);
         }
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if (cells[y][x].getTerrain() == TerrainType.GROUND) {
-
-                    int roll = Rng.RAND.nextInt(1000);
-
+                if (terrainMap[y][x] == TerrainType.GROUND) {
+                    int roll = Rng.nextInt(1000);
                     if (roll < 3) {
-                        cells[y][x].setTerrain(TerrainType.GOLD);
+                        terrainMap[y][x] = TerrainType.GOLD;
                     } else if (roll < 5) {
-                        cells[y][x].setTerrain(TerrainType.IRON);
+                        terrainMap[y][x] = TerrainType.IRON;
                     } else if (roll < 10) {
-                        cells[y][x].setTerrain(TerrainType.COAL);
+                        terrainMap[y][x] = TerrainType.COAL;
                     }
                 }
             }
         }
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                cells[y][x] = new Cell(terrainMap[y][x]);
+            }
+        }
     }
 
-    public void spawnCapitals(Cell[][] cells, List<Nation> nations, int width, int height) {
+    public void spawnCapitals(World world, Cell[][] cells, List<Nation> nations, int width, int height) {
         for (Nation nation : nations) {
             int attempts = 0;
             while (attempts < 100) {
@@ -57,7 +62,7 @@ public class MapGenerator {
                 int y = Rng.nextInt(height);
                 Cell cell = cells[y][x];
                 if (cell.isGround() && !cell.isOwned()) {
-                    World.claimCell(cell, nation);
+                    world.claimCell(cell, nation);
                     cell.setType(CellType.CAPITAL);
                     break;
                 }
@@ -66,30 +71,24 @@ public class MapGenerator {
         }
     }
 
-    private void smooth(Cell[][] cells, int width, int height) {
+    private TerrainType[][] smooth(TerrainType[][] currentMap, int width, int height) {
         TerrainType[][] buffer = new TerrainType[height][width];
-
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int groundNeighbors = countGroundNeighbors(cells, x, y, width, height);
+                int groundNeighbors = countGroundNeighbors(currentMap, x, y, width, height);
                 if (groundNeighbors > Config.get().smooth()) {
                     buffer[y][x] = TerrainType.GROUND;
                 } else if (groundNeighbors < Config.get().smooth()) {
                     buffer[y][x] = TerrainType.WATER;
                 } else {
-                    buffer[y][x] = cells[y][x].getTerrain();
+                    buffer[y][x] = currentMap[y][x];
                 }
             }
         }
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                cells[y][x].setTerrain(buffer[y][x]);
-            }
-        }
+        return buffer;
     }
 
-    private int countGroundNeighbors(Cell[][] cells, int cx, int cy, int width, int height) {
+    private int countGroundNeighbors(TerrainType[][] map, int cx, int cy, int width, int height) {
         int count = 0;
         for (int yMod = -1; yMod <= 1; yMod++) {
             for (int xMod = -1; xMod <= 1; xMod++) {
@@ -97,7 +96,9 @@ public class MapGenerator {
                 int nx = cx + xMod;
                 int ny = cy + yMod;
                 if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                    if (cells[ny][nx].isGround()) {
+                    TerrainType type = map[ny][nx];
+                    if (type == TerrainType.GROUND || type == TerrainType.GOLD
+                        || type == TerrainType.IRON || type == TerrainType.COAL) {
                         count++;
                     }
                 }

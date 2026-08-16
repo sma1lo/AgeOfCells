@@ -1,15 +1,17 @@
 package com.aoc.util;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
-public class Rng {
-    public static final Random RAND = new Random();
+public final class Rng {
+    private Rng() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     public static int nextInt(int bound) {
-        return RAND.nextInt(bound);
+        return ThreadLocalRandom.current().nextInt(bound);
     }
 
     public static boolean nextBoolean() {
-        return RAND.nextBoolean();
+        return ThreadLocalRandom.current().nextBoolean();
     }
 }

@@ -1,6 +1,6 @@
 package com.aoc.util;
 
-public class Time {
+public final class Time {
     private int currentTick = 0;
 
     public void tick() {

@@ -3,7 +3,7 @@ package com.aoc.cell;
 import com.aoc.nation.Nation;
 
 public class Cell {
-    private TerrainType terrain;
+    private final TerrainType terrain;
     private Nation owner;
     private CellType type;
 
@@ -17,24 +17,20 @@ public class Cell {
         return terrain;
     }
 
-    public void setTerrain(TerrainType terrain) {
-        this.terrain = terrain;
-    }
-
-    public CellType getCellType() {
-        return type;
-    }
-
-    public void setCellType(CellType type) {
-        this.type = type;
-    }
-
     public Nation getOwner() {
         return owner;
     }
 
-    public void setOwner(Nation owner) {
-        this.owner = owner;
+    public void setOwner(Nation newOwner) {
+        if (this.owner != null) {
+            this.owner.removeCell(this);
+        }
+        this.owner = newOwner;
+
+        if (newOwner != null) {
+            newOwner.addCell(this);
+        }
+
     }
 
     public CellType getType() {
@@ -50,7 +46,8 @@ public class Cell {
     }
 
     public boolean isGround() {
-        return terrain == TerrainType.GROUND || terrain == TerrainType.GOLD
+        return terrain == TerrainType.GROUND
+            || terrain == TerrainType.GOLD
             || terrain == TerrainType.IRON
             || terrain == TerrainType.COAL;
     }
@@ -68,8 +65,10 @@ public class Cell {
     }
 
     public boolean isLand() {
-        return type == CellType.LAND  || type == CellType.VILLAGE ||
-            type == CellType.TOWN || type == CellType.CASTLE;
+        return type == CellType.LAND
+            || type == CellType.VILLAGE
+            || type == CellType.TOWN
+            || type == CellType.CASTLE;
     }
 
     public boolean isVillage() {

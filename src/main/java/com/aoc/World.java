@@ -38,10 +38,13 @@ public class World {
     }
 
     public void init() {
-        generator.generateTerrain(cells, this.width, this.height);
+        generator.generateTerrain(this, cells, this.width, this.height);
+
         fillNations();
-        generator.spawnCapitals(cells, nations, this.width, this.height);
+
+        generator.spawnCapitals(this, cells, nations, this.width, this.height);
     }
+
 
     public void generateGrid(Screen screen) {
         renderer.render(cells, screen);
@@ -322,32 +325,26 @@ public class World {
         return count;
     }
 
-    private static void tryBuilding(Nation builder) {
+    private void tryBuilding(Nation builder) {
         List<Cell> lands = new ArrayList<>();
-
         for (Cell cell : builder.getOwnedCells()) {
-            if (cell.isLand()
+            if (cell.getType() == CellType.LAND
                 || cell.getType() == CellType.VILLAGE
                 || cell.getType() == CellType.TOWN) {
                 lands.add(cell);
             }
         }
-
         if (lands.isEmpty()) return;
-
         Cell cell = Element.getRandomElement(lands);
-
         int cost;
         CellType next;
         int limit;
-
         switch (cell.getType()) {
             case LAND -> {
                 cost = 300;
                 next = CellType.VILLAGE;
                 limit = 24;
             }
-
             case VILLAGE -> {
                 cost = 500;
                 next = CellType.TOWN;
@@ -364,12 +361,13 @@ public class World {
                 return;
             }
         }
-
-        if (countBuildings(builder, next) >= limit) return;
         if (builder.getGold() < cost) return;
-
+        if (countBuildings(builder, next) >= limit) return;
         builder.spendGold(cost);
         cell.setType(next);
+        if (next == CellType.CASTLE) {
+            builder.addPower(25);
+        }
     }
 
     private void rotateState(int tick) {
@@ -407,13 +405,11 @@ public class World {
     }
 
     public void claimCell(Cell cell, Nation newOwner) {
-        Nation oldOwner = cell.getOwner();
-        if (oldOwner != null) {
-            oldOwner.removeCell(cell);
-        }
-        if (newOwner != null) {
-            newOwner.addCell(cell);
-        } else {
+        if (cell == null) return;
+
+        cell.setOwner(newOwner);
+
+        if (newOwner == null) {
             cell.setType(CellType.NONE);
         }
     }

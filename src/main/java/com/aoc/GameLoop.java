@@ -47,7 +47,5 @@ public class GameLoop {
             screen.refresh();
             Thread.sleep(Config.get().tickDelayMs());
         }
-
     }
-
 }

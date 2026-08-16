@@ -1,25 +1,37 @@
 package com.aoc.nation;
 
 import com.aoc.config.Config;
+import com.aoc.util.Color;
 
 import java.util.*;
 
-public class NationGenerator {
+public final class NationGenerator {
     private static final Random random = new Random();
     private static int nameCounter = 0;
+
+    private NationGenerator() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     public static void generate(List<Nation> nationsList) {
         nationsList.clear();
         nameCounter = 0;
-
         int nationCount = Config.get().nations();
+
+        List<Color> colorPool = new ArrayList<>(Arrays.asList(Nation.AVAILABLE_COLORS));
+        Collections.shuffle(colorPool, random);
+        int colorIndex = 0;
 
         for (int i = 0; i < nationCount; i++) {
             String name = generateLetterName();
             long startingPower = 50 + random.nextInt(100);
 
-            nationsList.add(new Nation(name, startingPower));
+            Color nationColor = colorPool.get(colorIndex % colorPool.size());
+            colorIndex++;
+
+            nationsList.add(new Nation(name, startingPower, nationColor));
         }
+
     }
 
     private static String generateLetterName() {
@@ -29,7 +41,6 @@ public class NationGenerator {
 
     private static String generateNameFromNumber(int number) {
         StringBuilder name = new StringBuilder();
-
         while (number > 0) {
             number--;
             char letter = (char) ('A' + (number % 26));
@@ -38,5 +49,6 @@ public class NationGenerator {
         }
 
         return name.toString();
+
     }
 }

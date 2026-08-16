@@ -6,19 +6,19 @@ import com.aoc.util.Color;
 import java.util.*;
 
 public class Nation {
-    private String name;
+    private final String name;
+    private final Color color;
     private long power;
     private long gold;
-    protected SituationState state;
-    private int stability = 100;
-    private int libertyDesire = 0;
-    private Color color;
+    private SituationState state;
+    private int stability;
+    private int libertyDesire;
 
     private Nation master = null;
     private final Set<Cell> ownedCells = new HashSet<>();
     private final List<Nation> vassals = new ArrayList<>();
 
-    private static final Color[] AVAILABLE_COLORS = {
+    public static final Color[] AVAILABLE_COLORS = {
         Color.RED, Color.GREEN, Color.YELLOW, Color.PURPLE,
         Color.CYAN, Color.BROWN, Color.PINK,
         Color.ORANGE, Color.GRAY, Color.BRIGHT_RED, Color.BRIGHT_GREEN,
@@ -26,24 +26,25 @@ public class Nation {
         Color.LIME, Color.GOLD, Color.TEAL, Color.MAGENTA, Color.DARK_BLUE
     };
 
-    public Nation(String name, long startingPower) {
+    public Nation(String name, long startingPower, Color color) {
         this.name = name;
         this.power = startingPower;
         this.gold = startingPower;
+        this.color = color;
         this.state = SituationState.PEACE;
         this.stability = 100;
-        this.color = AVAILABLE_COLORS[new Random().nextInt(AVAILABLE_COLORS.length)];
+        this.libertyDesire = 0;
     }
 
     public void addCell(Cell cell) {
-        ownedCells.add(cell);
-        cell.setOwner(this);
+        if (cell != null) {
+            ownedCells.add(cell);
+        }
     }
 
     public void removeCell(Cell cell) {
-        ownedCells.remove(cell);
-        if (cell.getOwner() == this) {
-            cell.setOwner(null);
+        if (cell != null) {
+            ownedCells.remove(cell);
         }
     }
 
@@ -101,11 +102,13 @@ public class Nation {
     }
 
     public void addGold(long amount) {
-        this.gold += amount;
+        if (amount > 0) {
+            this.gold += amount;
+        }
     }
 
     public boolean spendGold(long amount) {
-        if (gold >= amount) {
+        if (amount > 0 && gold >= amount) {
             gold -= amount;
             return true;
         }
@@ -113,7 +116,7 @@ public class Nation {
     }
 
     public void addPower(long amount) {
-        this.power += amount;
+        this.power = Math.max(0, this.power + amount);
     }
 
     public void strengthenFromGold() {
@@ -147,4 +150,5 @@ public class Nation {
     public long getGold() {
         return gold;
     }
+
 }
