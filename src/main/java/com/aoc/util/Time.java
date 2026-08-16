@@ -1,13 +1,14 @@
 package com.aoc.util;
 
 public class Time {
-    static int currentTick = 0;
+    private int currentTick = 0;
 
-    public static void tick() {
-        currentTick++;
+    public void tick() {
+        this.currentTick++;
     }
 
-    public static int getCurrentTick() {
-        return currentTick;
+    public int getCurrentTick() {
+        return this.currentTick;
     }
+
 }

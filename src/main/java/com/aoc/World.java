@@ -19,37 +19,52 @@ import java.util.List;
 
 public class World {
 
-    private static final Cell[][] cells = new Cell[Config.get().height()][Config.get().width()];
-    private static final List<Nation> nations = new ArrayList<>();
+    private final Cell[][] cells;
+    private final List<Nation> nations;
+    private final Time time;
+    private final MapGenerator generator;
+    private final WorldRenderer renderer;
+    private final int height;
+    private final int width;
 
-    private static final MapGenerator generator = new MapGenerator();
-    private static final WorldRenderer renderer = new WorldRenderer(Config.get().width(), Config.get().height());
-
-    public static void init() {
-        generator.generateTerrain(cells, Config.get().width(), Config.get().height());
-        fillNations();
-        generator.spawnCapitals(cells, nations, Config.get().width(), Config.get().height());
+    public World(Time time) {
+        this.time = time;
+        this.width = Config.get().width();
+        this.height = Config.get().height();
+        this.cells = new Cell[height][width];
+        this.nations = new ArrayList<>();
+        this.generator = new MapGenerator();
+        this.renderer = new WorldRenderer(width, height);
     }
 
-    public static void generateGrid(Screen screen) {
+    public void init() {
+        generator.generateTerrain(cells, this.width, this.height);
+        fillNations();
+        generator.spawnCapitals(cells, nations, this.width, this.height);
+    }
+
+    public void generateGrid(Screen screen) {
         renderer.render(cells, screen);
     }
 
-    private static void fillNations() {
+    private void fillNations() {
         nations.clear();
         NationGenerator.generate(nations);
     }
 
-    public static void update() {
+    public void update() {
+        int currentTick = this.time.getCurrentTick();
         collectEconomy();
-        if (Time.getCurrentTick() % 4 == 0) {
+
+        if (currentTick % 4 == 0) {
             for (Nation nation : nations) {
                 nation.strengthenFromGold();
             }
         }
+
         DiplomacyManager.update(nations);
-        rotateState();
-        check();
+        rotateState(currentTick);
+        check(currentTick);
         checkCapitals();
 
         for (Nation nation : nations) {
@@ -67,7 +82,7 @@ public class World {
         }
     }
 
-    private static int countShips(Nation nation) {
+    private int countShips(Nation nation) {
         int count = 0;
         for (Cell cell : nation.getOwnedCells()) {
             if (cell.isShip()) count++;
@@ -75,7 +90,7 @@ public class World {
         return count;
     }
 
-    public static void collectEconomy() {
+    public void collectEconomy() {
         for (Nation nation : nations) {
             for (Cell cell : nation.getOwnedCells()) {
                 long income = 0;
@@ -104,9 +119,9 @@ public class World {
         }
     }
 
-    public static void check() {
-        for (int y = 0; y < Config.get().height(); y++) {
-            for (int x = 0; x < Config.get().width(); x++) {
+    public void check(int tick) {
+        for (int y = 0; y < this.height; y++) {
+            for (int x = 0; x < this.width; x++) {
                 Cell cell = cells[y][x];
                 Nation owner = cell.getOwner();
 
@@ -124,14 +139,14 @@ public class World {
             }
         }
 
-        if (Time.getCurrentTick() % 10 == 0) {
+        if (tick % 10 == 0) {
             for (Nation nation : nations) {
                 tryBuilding(nation);
             }
         }
     }
 
-    private static boolean hasLand(Nation nation) {
+    private boolean hasLand(Nation nation) {
         for (Cell cell : nation.getOwnedCells()) {
             if (cell.isLand() || cell.isCapital()) {
                 return true;
@@ -140,7 +155,7 @@ public class World {
         return false;
     }
 
-    public static void checkCapitals() {
+    public void checkCapitals() {
         Iterator<Nation> iterator = nations.iterator();
         while (iterator.hasNext()) {
             Nation nation = iterator.next();
@@ -155,7 +170,7 @@ public class World {
         }
     }
 
-    private static boolean hasCapital(Nation nation) {
+    private boolean hasCapital(Nation nation) {
         for (Cell cell : nation.getOwnedCells()) {
             if (cell.isCapital()) {
                 return true;
@@ -164,7 +179,7 @@ public class World {
         return false;
     }
 
-    private static void eliminateNation(Nation nation) {
+    private void eliminateNation(Nation nation) {
         if (nation.isVassal()) {
             nation.getMaster().removeVassal(nation);
         }
@@ -179,12 +194,12 @@ public class World {
         }
     }
 
-    private static void tryExpand(int x, int y, Nation attacker) {
+    private void tryExpand(int x, int y, Nation attacker) {
         if (attacker.getPower() < 10) return;
 
         int nx = x + (Rng.nextInt(3) - 1);
         int ny = y + (Rng.nextInt(3) - 1);
-        if (nx < 0 || nx >= Config.get().width() || ny < 0 || ny >= Config.get().height()) return;
+        if (nx < 0 || nx >= this.width || ny < 0 || ny >= this.height) return;
 
         Cell target = cells[ny][nx];
         long cost = 12;
@@ -244,10 +259,10 @@ public class World {
         }
     }
 
-    private static void trySail(int x, int y, Nation attacker) {
+    private void trySail(int x, int y, Nation attacker) {
         int nx = x + (Rng.nextInt(3) - 1);
         int ny = y + (Rng.nextInt(3) - 1);
-        if (nx < 0 || nx >= Config.get().width() || ny < 0 || ny >= Config.get().height()) return;
+        if (nx < 0 || nx >= this.width || ny < 0 || ny >= this.height) return;
 
         Cell target = cells[ny][nx];
         Cell current = cells[y][x];
@@ -357,12 +372,11 @@ public class World {
         cell.setType(next);
     }
 
-    private static void rotateState() {
-        int tick = Time.getCurrentTick();
+    private void rotateState(int tick) {
         if (tick % 35 == 0) {
             for (Nation nation : nations) {
                 if (nation.isVassal()) continue;
-
+                if (nation.getState() == SituationState.UNION) continue;
                 int chance = Rng.nextInt(100);
 
                 if (chance < 55) {
@@ -380,7 +394,7 @@ public class World {
         }
     }
 
-    private static boolean isFriendly(Nation a, Nation b) {
+    private boolean isFriendly(Nation a, Nation b) {
         if (a == null || b == null || a == b) return true;
         if (a.getVassals().contains(b) || b.getVassals().contains(a)) {
             return true;
@@ -392,7 +406,7 @@ public class World {
         return false;
     }
 
-    public static void claimCell(Cell cell, Nation newOwner) {
+    public void claimCell(Cell cell, Nation newOwner) {
         Nation oldOwner = cell.getOwner();
         if (oldOwner != null) {
             oldOwner.removeCell(cell);
@@ -404,11 +418,11 @@ public class World {
         }
     }
 
-    public static Cell[][] getCells() {
+    public Cell[][] getCells() {
         return cells;
     }
 
-    public static List<Nation> getNations() {
+    public List<Nation> getNations() {
         return nations;
     }
 }

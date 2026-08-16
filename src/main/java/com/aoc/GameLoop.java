@@ -13,7 +13,11 @@ import java.io.IOException;
 
 public class GameLoop {
     public static void run(Screen screen) throws InterruptedException, IOException {
-        World.init();
+        Time time = new Time();
+        World world = new World(time);
+
+        world.init();
+
         TextGraphics status = screen.newTextGraphics();
 
         while (true) {
@@ -28,20 +32,22 @@ public class GameLoop {
                 }
             }
 
-            Time.tick();
-            World.update();
+            time.tick();
+            world.update();
 
             screen.clear();
 
             status.setForegroundColor(TextColor.ANSI.WHITE);
             status.setBackgroundColor(TextColor.ANSI.DEFAULT);
             status.putString(new TerminalPosition(0, 0),
-                "Game tick: " + Time.getCurrentTick() + " | Active Nations: " + World.getNations().size() + "   [Q] quit");
+                "Game tick: " + time.getCurrentTick() + " | Active Nations: " + world.getNations().size() + "   [Q] quit");
 
-            World.generateGrid(screen);
+            world.generateGrid(screen);
 
             screen.refresh();
             Thread.sleep(Config.get().tickDelayMs());
         }
+
     }
+
 }
