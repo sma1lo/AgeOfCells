@@ -1,6 +1,6 @@
 # Age of Cells
 
-An interactive, geopolitical world simulation engine written in Java with **Lanterna**.
+An interactive, geopolitical world simulation engine written in Java with **[Lanterna](https://github.com/mabe02/lanterna)**.
 Age of Cells models emergent historic dynamics on a grid, including territorial expansion, economic resource gathering, and state-driven diplomacy with master-vassal hierarchies and rebellion mechanics.
 
 <p align="center">
