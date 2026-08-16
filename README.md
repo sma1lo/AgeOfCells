@@ -4,7 +4,7 @@ An interactive, geopolitical world simulation engine written in Java with **Lant
 Age of Cells models emergent historic dynamics on a grid, including territorial expansion, economic resource gathering, and state-driven diplomacy with master-vassal hierarchies and rebellion mechanics.
 
 <p align="center">
-  <img src="assets/preview.png" alt="Age of Cells Simulation Preview" width="80%">
+  <img src="assets/preview.gif" alt="Age of Cells Simulation Preview" width="80%">
 </p>
 
 ---
