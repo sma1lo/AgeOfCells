@@ -19,8 +19,8 @@ public class Nation {
     private final List<Nation> vassals = new ArrayList<>();
 
     private static final Color[] AVAILABLE_COLORS = {
-        Color.RED, Color.GREEN, Color.YELLOW, Color.BLUE, Color.PURPLE,
-        Color.CYAN, Color.WHITE, Color.BROWN, Color.PINK,
+        Color.RED, Color.GREEN, Color.YELLOW, Color.PURPLE,
+        Color.CYAN, Color.BROWN, Color.PINK,
         Color.ORANGE, Color.GRAY, Color.BRIGHT_RED, Color.BRIGHT_GREEN,
         Color.BRIGHT_YELLOW, Color.BRIGHT_BLUE, Color.BRIGHT_CYAN,
         Color.LIME, Color.GOLD, Color.TEAL, Color.MAGENTA, Color.DARK_BLUE

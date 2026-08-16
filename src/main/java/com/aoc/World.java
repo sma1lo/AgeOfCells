@@ -8,6 +8,7 @@ import com.aoc.nation.Nation;
 import com.aoc.nation.NationGenerator;
 import com.aoc.nation.SituationState;
 import com.aoc.render.WorldRenderer;
+import com.googlecode.lanterna.screen.Screen;
 import com.aoc.util.Element;
 import com.aoc.util.Rng;
 import com.aoc.util.Time;
@@ -22,7 +23,7 @@ public class World {
     private static final List<Nation> nations = new ArrayList<>();
 
     private static final MapGenerator generator = new MapGenerator();
-    private static final WorldRenderer renderer = new WorldRenderer(Config.get().width(), Config.get().width());
+    private static final WorldRenderer renderer = new WorldRenderer(Config.get().width(), Config.get().height());
 
     public static void init() {
         generator.generateTerrain(cells, Config.get().width(), Config.get().height());
@@ -30,8 +31,8 @@ public class World {
         generator.spawnCapitals(cells, nations, Config.get().width(), Config.get().height());
     }
 
-    public static void generateGrid() {
-        renderer.render(cells, Config.get().width(), Config.get().height());
+    public static void generateGrid(Screen screen) {
+        renderer.render(cells, screen);
     }
 
     private static void fillNations() {
