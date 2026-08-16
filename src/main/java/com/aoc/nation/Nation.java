@@ -12,40 +12,27 @@ public class Nation {
     protected SituationState state;
     private int stability = 100;
     private int libertyDesire = 0;
-    private NationType nationType;
     private Color color;
 
     private Nation master = null;
     private final Set<Cell> ownedCells = new HashSet<>();
     private final List<Nation> vassals = new ArrayList<>();
 
-    public Nation(String name, NationType nationType, long startingPower) {
+    private static final Color[] AVAILABLE_COLORS = {
+        Color.RED, Color.GREEN, Color.YELLOW, Color.BLUE, Color.PURPLE,
+        Color.CYAN, Color.WHITE, Color.BROWN, Color.PINK,
+        Color.ORANGE, Color.GRAY, Color.BRIGHT_RED, Color.BRIGHT_GREEN,
+        Color.BRIGHT_YELLOW, Color.BRIGHT_BLUE, Color.BRIGHT_CYAN,
+        Color.LIME, Color.GOLD, Color.TEAL, Color.MAGENTA, Color.DARK_BLUE
+    };
+
+    public Nation(String name, long startingPower) {
         this.name = name;
-        this.nationType = nationType;
         this.power = startingPower;
         this.gold = startingPower;
         this.state = SituationState.PEACE;
         this.stability = 100;
-        this.color = switch (nationType) {
-            case ROME -> Color.RED;
-            case BAVARIA -> Color.CYAN;
-            case ENGLAND -> Color.GREEN;
-            case FRANCE -> Color.PINK;
-            case SCOTLAND -> Color.YELLOW;
-            case AUSTRIA -> Color.PURPLE;
-            case RUSSIA -> Color.BROWN;
-            case PRUSSIA -> Color.BLUE;
-            case OTTOMANS -> Color.ORANGE;
-            case SPAIN -> Color.WHITE;
-            case SWEDEN -> Color.GRAY;
-            case POLAND -> Color.BRIGHT_RED;
-            case VENICE -> Color.GOLD;
-            case PORTUGAL -> Color.LIME;
-            case DENMARK -> Color.MAGENTA;
-            case NETHERLANDS -> Color.BRIGHT_YELLOW;
-            case PERSIA -> Color.TEAL;
-            default -> Color.WHITE;
-        };
+        this.color = AVAILABLE_COLORS[new Random().nextInt(AVAILABLE_COLORS.length)];
     }
 
     public void addCell(Cell cell) {

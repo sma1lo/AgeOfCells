@@ -5,7 +5,7 @@ import com.aoc.config.Config;
 import com.aoc.diplomacy.DiplomacyManager;
 import com.aoc.map.MapGenerator;
 import com.aoc.nation.Nation;
-import com.aoc.nation.NationType;
+import com.aoc.nation.NationGenerator;
 import com.aoc.nation.SituationState;
 import com.aoc.render.WorldRenderer;
 import com.aoc.util.Element;
@@ -36,23 +36,7 @@ public class World {
 
     private static void fillNations() {
         nations.clear();
-        nations.add(new Nation("Rome", NationType.ROME, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Bavaria", NationType.BAVARIA, Rng.nextInt(100) + 50));
-        nations.add(new Nation("England", NationType.ENGLAND, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Russia", NationType.RUSSIA, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Austria", NationType.AUSTRIA, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Scotland", NationType.SCOTLAND, Rng.nextInt(100) + 50));
-        nations.add(new Nation("France", NationType.FRANCE, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Prussia", NationType.PRUSSIA, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Ottomans", NationType.OTTOMANS, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Spain", NationType.SPAIN, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Sweden", NationType.SWEDEN, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Poland", NationType.POLAND, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Venice", NationType.VENICE, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Portugal", NationType.PORTUGAL, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Denmark", NationType.DENMARK, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Netherlands", NationType.NETHERLANDS, Rng.nextInt(100) + 50));
-        nations.add(new Nation("Persia", NationType.PERSIA, Rng.nextInt(100) + 50));
+        NationGenerator.generate(nations);
     }
 
     public static void update() {

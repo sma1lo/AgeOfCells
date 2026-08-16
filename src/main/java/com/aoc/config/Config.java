@@ -7,7 +7,8 @@ public record Config(
     int width,
     int height,
     int smooth,
-    int tickDelayMs
+    int tickDelayMs,
+    int nations
 ) {
     private static Config instance;
     public static void load(String path) {
@@ -16,7 +17,8 @@ public record Config(
             (int) rawData.get("width"),
             (int) rawData.get("height"),
             (int) rawData.get("smooth"),
-            (int) rawData.get("tickDelayMs")
+            (int) rawData.get("tickDelayMs"),
+            (int) rawData.get("nations")
         );
     }
 
