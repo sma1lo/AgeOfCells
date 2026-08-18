@@ -35,6 +35,8 @@ public class WorldRenderer {
                     symbol = "#";
                 } else if (cell.getTerrain() == TerrainType.COAL) {
                     symbol = "*";
+                } else if (cell.isCamp()) {
+                    symbol = "c";
                 }
 
                 if (cell.isOwned()) {

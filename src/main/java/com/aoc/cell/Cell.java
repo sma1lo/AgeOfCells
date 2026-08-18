@@ -68,7 +68,7 @@ public class Cell {
         return type == CellType.LAND
             || type == CellType.VILLAGE
             || type == CellType.TOWN
-            || type == CellType.CASTLE;
+            || type == CellType.CASTLE || type == CellType.CAMP;
     }
 
     public boolean isVillage() {
@@ -81,5 +81,9 @@ public class Cell {
 
     public boolean isCastle() {
         return type == CellType.CASTLE;
+    }
+
+    public boolean isCamp() {
+        return type == CellType.CAMP;
     }
 }

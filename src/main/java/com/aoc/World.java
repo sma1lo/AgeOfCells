@@ -41,7 +41,7 @@ public class World {
         generator.generateTerrain(this, cells, this.width, this.height);
 
         fillNations();
-
+        generator.spawnMarauderCamp(this, cells, width, height);
         generator.spawnCapitals(this, cells, nations, this.width, this.height);
     }
 

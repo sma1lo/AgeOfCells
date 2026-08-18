@@ -71,6 +71,20 @@ public class MapGenerator {
         }
     }
 
+    public void spawnMarauderCamp(World world, Cell[][] cells, int width, int height) {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Cell cell = cells[y][x];
+                if (cell.isGround() && !cell.isOwned() && cell.getType() == CellType.NONE) {
+                    int roll = Rng.nextInt(1000);
+                    if (roll < 3) {
+                        cell.setType(CellType.CAMP);
+                    }
+                }
+            }
+        }
+    }
+
     private TerrainType[][] smooth(TerrainType[][] currentMap, int width, int height) {
         TerrainType[][] buffer = new TerrainType[height][width];
         for (int y = 0; y < height; y++) {

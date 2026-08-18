@@ -8,4 +8,5 @@ public enum CellType {
     CASTLE,
     TOWN,
     VILLAGE,
+    CAMP
 }
