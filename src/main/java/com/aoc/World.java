@@ -41,7 +41,7 @@ public class World {
         generator.generateTerrain(this, cells, this.width, this.height);
 
         fillNations();
-
+        generator.spawnMarauderCamp(this, cells, width, height);
         generator.spawnCapitals(this, cells, nations, this.width, this.height);
     }
 
@@ -69,6 +69,7 @@ public class World {
         rotateState(currentTick);
         check(currentTick);
         checkCapitals();
+        updateMarauders();
 
         for (Nation nation : nations) {
             int ships = countShips(nation);
@@ -368,6 +369,92 @@ public class World {
         if (next == CellType.CASTLE) {
             builder.addPower(25);
         }
+    }
+
+    public void updateMarauders() {
+        boolean[][] movedThisTick = new boolean[height][width];
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Cell cell = cells[y][x];
+
+                if (cell.getType() == CellType.CAMP) {
+                    if (Rng.nextInt(100) < 20) {
+                        Object[] spawnData = getRandomNeighboringLand(x, y);
+                        if (spawnData != null) {
+                            Cell spawnPoint = (Cell) spawnData[0];
+                            if (spawnPoint.getType() == CellType.NONE && !spawnPoint.isOwned()) {
+                                spawnPoint.setType(CellType.MARAUDER);
+                            }
+                        }
+                    }
+                }
+
+                if (cell.getType() == CellType.MARAUDER && !movedThisTick[y][x]) {
+                    Object[] moveData = getRandomNeighboringLand(x, y);
+
+                    if (moveData != null) {
+                        Cell nextCell = (Cell) moveData[0];
+                        int nx = (Integer) moveData[1];
+                        int ny = (Integer) moveData[2];
+
+                        if (Rng.nextInt(100) < 1) {
+                            cell.setType(CellType.NONE);
+                            continue;
+                        }
+
+                        if (nextCell.isOwned()) {
+                            Nation victim = nextCell.getOwner();
+                            if (victim != null) {
+                                if (nextCell.getType() == CellType.VILLAGE) {
+                                    nextCell.setType(CellType.NONE);
+                                    victim.spendGold(100);
+                                } else {
+                                    victim.spendGold(10);
+                                }
+                            }
+                            nextCell.setOwner(null);
+                        }
+
+                        nextCell.setType(CellType.MARAUDER);
+                        cell.setType(CellType.NONE);
+
+                        movedThisTick[ny][nx] = true;
+                    }
+                }
+            }
+        }
+    }
+
+    private Object[] getRandomNeighboringLand(int cx, int cy) {
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        if (Rng.nextInt(100) < 40) {
+            for (int i = 0; i < directions.length; i++) {
+                int index = Rng.nextInt(directions.length);
+                int[] temp = directions[i];
+                directions[i] = directions[index];
+                directions[index] = temp;
+            }
+
+            for (int[] dir : directions) {
+                int nx = cx + dir[0];
+                int ny = cy + dir[1];
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                    Cell neighbor = cells[ny][nx];
+                    CellType type = neighbor.getType();
+
+                    if (neighbor.isGround()
+                        && type != CellType.CAMP
+                        && type != CellType.CAPITAL
+                        && type != CellType.CASTLE
+                        && type != CellType.MARAUDER) {
+
+                        return new Object[]{neighbor, nx, ny};
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void rotateState(int tick) {

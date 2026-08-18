@@ -39,9 +39,11 @@ Age of Cells models emergent historic dynamics on a grid, including territorial 
 | `C`    | Castle           |
 | `T`    | Town             |
 | `v`    | Village          |
+| `c`    | Camp             |
 | `$`    | Gold             |
 | `#`    | Iron             |
 | `*`    | Coal             |
+| `m`    | Marauder         |
 | `0`    | Unclaimed ground |
 
 > [!NOTE]
