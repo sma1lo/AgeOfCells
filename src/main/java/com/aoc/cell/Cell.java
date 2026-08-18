@@ -86,4 +86,8 @@ public class Cell {
     public boolean isCamp() {
         return type == CellType.CAMP;
     }
+
+    public boolean isMarauder(){
+        return type == CellType.MARAUDER;
+    }
 }
