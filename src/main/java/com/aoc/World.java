@@ -404,6 +404,15 @@ public class World {
                         }
 
                         if (nextCell.isOwned()) {
+                            Nation victim = nextCell.getOwner();
+                            if (victim != null) {
+                                if (nextCell.getType() == CellType.VILLAGE) {
+                                    nextCell.setType(CellType.NONE);
+                                    victim.spendGold(100);
+                                } else {
+                                    victim.spendGold(10);
+                                }
+                            }
                             nextCell.setOwner(null);
                         }
 
@@ -419,7 +428,7 @@ public class World {
 
     private Object[] getRandomNeighboringLand(int cx, int cy) {
         int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-        if(Rng.nextInt(100) < 40) {
+        if (Rng.nextInt(100) < 40) {
             for (int i = 0; i < directions.length; i++) {
                 int index = Rng.nextInt(directions.length);
                 int[] temp = directions[i];
