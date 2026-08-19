@@ -2,11 +2,12 @@ package com.aoc.nation;
 
 import com.aoc.config.Config;
 import com.aoc.util.Color;
+import com.aoc.util.Rng;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class NationGenerator {
-    private static final Random random = new Random();
     private static int nameCounter = 0;
 
     private NationGenerator() {
@@ -17,21 +18,19 @@ public final class NationGenerator {
         nationsList.clear();
         nameCounter = 0;
         int nationCount = Config.get().nations();
-
         List<Color> colorPool = new ArrayList<>(Arrays.asList(Nation.AVAILABLE_COLORS));
-        Collections.shuffle(colorPool, random);
+        Collections.shuffle(colorPool, ThreadLocalRandom.current());
         int colorIndex = 0;
 
         for (int i = 0; i < nationCount; i++) {
             String name = generateLetterName();
-            long startingPower = 50 + random.nextInt(100);
+            long startingPower = 50 + Rng.nextInt(100);
 
             Color nationColor = colorPool.get(colorIndex % colorPool.size());
             colorIndex++;
 
             nationsList.add(new Nation(name, startingPower, nationColor));
         }
-
     }
 
     private static String generateLetterName() {
@@ -47,8 +46,6 @@ public final class NationGenerator {
             name.insert(0, letter);
             number = number / 26;
         }
-
         return name.toString();
-
     }
 }

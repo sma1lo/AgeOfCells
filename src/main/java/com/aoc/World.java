@@ -196,6 +196,18 @@ public class World {
             cell.setType(CellType.NONE);
             claimCell(cell, null);
         }
+
+        if (Rng.nextInt(100) < 75 && !cellsToClear.isEmpty()) {
+
+            int campsToSpawn = Math.min(Rng.nextInt(7) + 1, cellsToClear.size());
+
+            for (int i = 0; i < campsToSpawn; i++) {
+                int randomIndex = Rng.nextInt(cellsToClear.size());
+                Cell randomCell = cellsToClear.get(randomIndex);
+                randomCell.setType(CellType.CAMP);
+                cellsToClear.remove(randomIndex);
+            }
+        }
     }
 
     private void tryExpand(int x, int y, Nation attacker) {
