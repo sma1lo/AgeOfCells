@@ -198,7 +198,6 @@ public class World {
         }
 
         if (Rng.nextInt(100) < 75 && !cellsToClear.isEmpty()) {
-
             int campsToSpawn = Math.min(Rng.nextInt(7) + 1, cellsToClear.size());
 
             for (int i = 0; i < campsToSpawn; i++) {

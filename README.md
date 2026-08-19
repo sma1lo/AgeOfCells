@@ -89,7 +89,7 @@ AgeOfCells/
 │       └── resources/
 │           └── config.yaml
 ├── assets/
-│   └── preview.png
+│   └── preview.gif
 ├── build.gradle
 ├── gradlew
 ├── gradlew.bat
