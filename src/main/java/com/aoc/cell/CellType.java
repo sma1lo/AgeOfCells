@@ -5,9 +5,12 @@ public enum CellType {
     CAPITAL,
     LAND,
     SHIP,
+
     CASTLE,
     TOWN,
     VILLAGE,
     CAMP,
+    PORT,
+
     MARAUDER
 }

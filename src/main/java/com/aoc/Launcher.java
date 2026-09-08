@@ -12,7 +12,6 @@ import java.io.IOException;
 public class Launcher {
     public static void main(String[] args) {
         Config.load("config.yaml");
-
         Screen screen = null;
         try {
             DefaultTerminalFactory factory = new DefaultTerminalFactory();
@@ -43,7 +42,8 @@ public class Launcher {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 try {
                     if (s != null) s.stopScreen();
-                } catch (IOException ignored) {}
+                } catch (IOException ignored) {
+                }
             }));
 
             GameLoop.run(screen);
@@ -55,7 +55,8 @@ public class Launcher {
             if (screen != null) {
                 try {
                     screen.stopScreen();
-                } catch (IOException ignored) {}
+                } catch (IOException ignored) {
+                }
             }
         }
     }

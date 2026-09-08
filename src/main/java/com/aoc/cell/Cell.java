@@ -68,7 +68,9 @@ public class Cell {
         return type == CellType.LAND
             || type == CellType.VILLAGE
             || type == CellType.TOWN
-            || type == CellType.CASTLE || type == CellType.CAMP;
+            || type == CellType.CASTLE
+            || type == CellType.CAMP
+            || type == CellType.PORT;
     }
 
     public boolean isVillage() {
@@ -87,7 +89,11 @@ public class Cell {
         return type == CellType.CAMP;
     }
 
-    public boolean isMarauder(){
+    public boolean isPort() {
+        return type == CellType.PORT;
+    }
+
+    public boolean isMarauder() {
         return type == CellType.MARAUDER;
     }
 }

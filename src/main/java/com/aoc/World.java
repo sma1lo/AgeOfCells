@@ -1,6 +1,7 @@
 package com.aoc;
 
-import com.aoc.cell.*;
+import com.aoc.cell.Cell;
+import com.aoc.cell.CellType;
 import com.aoc.config.Config;
 import com.aoc.diplomacy.DiplomacyManager;
 import com.aoc.map.MapGenerator;
@@ -8,10 +9,10 @@ import com.aoc.nation.Nation;
 import com.aoc.nation.NationGenerator;
 import com.aoc.nation.SituationState;
 import com.aoc.render.WorldRenderer;
-import com.googlecode.lanterna.screen.Screen;
 import com.aoc.util.Element;
 import com.aoc.util.Rng;
 import com.aoc.util.Time;
+import com.googlecode.lanterna.screen.Screen;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,81 +32,57 @@ public class World {
         this.time = time;
         this.width = Config.get().width();
         this.height = Config.get().height();
-        this.cells = new Cell[height][width];
+        this.cells = new Cell[this.height][this.width];
         this.nations = new ArrayList<>();
         this.generator = new MapGenerator();
-        this.renderer = new WorldRenderer(width, height);
+        this.renderer = new WorldRenderer(this.width, this.height);
     }
 
     public void init() {
-        generator.generateTerrain(this, cells, this.width, this.height);
-
+        this.generator.generateTerrain(this, this.cells, this.width, this.height);
         fillNations();
-        generator.spawnMarauderCamp(this, cells, width, height);
-        generator.spawnCapitals(this, cells, nations, this.width, this.height);
+        this.generator.spawnMarauderCamp(this, this.cells, this.width, this.height);
+        this.generator.spawnCapitals(this, this.cells, this.nations, this.width, this.height);
     }
 
-
     public void generateGrid(Screen screen) {
-        renderer.render(cells, screen);
+        this.renderer.render(this.cells, screen);
     }
 
     private void fillNations() {
-        nations.clear();
-        NationGenerator.generate(nations);
+        this.nations.clear();
+        NationGenerator.generate(this.nations);
     }
 
     public void update() {
-        int currentTick = this.time.getCurrentTick();
+        int tick = this.time.getCurrentTick();
+
         collectEconomy();
 
-        if (currentTick % 4 == 0) {
-            for (Nation nation : nations) {
+        if (tick % 4 == 0) {
+            for (Nation nation : this.nations) {
                 nation.strengthenFromGold();
             }
         }
 
-        DiplomacyManager.update(nations);
-        rotateState(currentTick);
-        check(currentTick);
+        DiplomacyManager.update(this.nations);
+        rotateState(tick);
+        processExpansionAndSailing(tick);
         checkCapitals();
         updateMarauders();
-
-        for (Nation nation : nations) {
-            int ships = countShips(nation);
-            if (ships > 7) {
-                int toRemove = ships - 7;
-                for (Cell cell : new ArrayList<>(nation.getOwnedCells())) {
-                    if (toRemove <= 0) break;
-                    if (cell.isShip()) {
-                        cell.setType(CellType.LAND);
-                        toRemove--;
-                    }
-                }
-            }
-        }
+        limitShips();
     }
 
-    private int countShips(Nation nation) {
-        int count = 0;
-        for (Cell cell : nation.getOwnedCells()) {
-            if (cell.isShip()) count++;
-        }
-        return count;
-    }
+    private void collectEconomy() {
+        for (Nation nation : this.nations) {
+            long income = 0;
 
-    public void collectEconomy() {
-        for (Nation nation : nations) {
             for (Cell cell : nation.getOwnedCells()) {
-                long income = 0;
-
                 income += switch (cell.getType()) {
                     case CAPITAL -> 4;
-                    case LAND -> 1;
-                    case SHIP -> 1;
-                    case CASTLE -> 2;
-                    case TOWN -> 4;
-                    case VILLAGE -> 2;
+                    case LAND, SHIP -> 1;
+                    case CASTLE, VILLAGE -> 2;
+                    case TOWN -> 3;
                     default -> 0;
                 };
 
@@ -115,96 +92,34 @@ public class World {
                     case COAL -> 3;
                     default -> 0;
                 };
+            }
 
-                if (income > 0) {
-                    nation.addGold(income);
-                }
+            if (income > 0) {
+                nation.addGold(income);
             }
         }
     }
 
-    public void check(int tick) {
+    private void processExpansionAndSailing(int tick) {
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
-                Cell cell = cells[y][x];
+                Cell cell = this.cells[y][x];
                 Nation owner = cell.getOwner();
+                if (owner == null) continue;
 
-                if (owner != null && (cell.isCapital() || cell.isLand())) {
-                    if (Rng.nextInt(100) < 15) {
-                        tryExpand(x, y, owner);
-                    }
+                if ((cell.isCapital() || cell.isLand()) && Rng.nextInt(100) < 15) {
+                    tryExpand(x, y, owner);
                 }
 
-                if (owner != null && cell.isShip()) {
-                    if (Rng.nextInt(100) < 20) {
-                        trySail(x, y, owner);
-                    }
+                if (cell.isShip() && Rng.nextInt(100) < 20) {
+                    trySail(x, y, owner);
                 }
             }
         }
 
         if (tick % 10 == 0) {
-            for (Nation nation : nations) {
+            for (Nation nation : this.nations) {
                 tryBuilding(nation);
-            }
-        }
-    }
-
-    private boolean hasLand(Nation nation) {
-        for (Cell cell : nation.getOwnedCells()) {
-            if (cell.isLand() || cell.isCapital()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void checkCapitals() {
-        Iterator<Nation> iterator = nations.iterator();
-        while (iterator.hasNext()) {
-            Nation nation = iterator.next();
-
-            boolean noLand = !hasLand(nation);
-            boolean noCapitalAndNotVassal = !hasCapital(nation) && !nation.isVassal();
-
-            if (noLand || noCapitalAndNotVassal) {
-                eliminateNation(nation);
-                iterator.remove();
-            }
-        }
-    }
-
-    private boolean hasCapital(Nation nation) {
-        for (Cell cell : nation.getOwnedCells()) {
-            if (cell.isCapital()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void eliminateNation(Nation nation) {
-        if (nation.isVassal()) {
-            nation.getMaster().removeVassal(nation);
-        }
-        for (Nation v : new ArrayList<>(nation.getVassals())) {
-            nation.removeVassal(v);
-        }
-
-        List<Cell> cellsToClear = new ArrayList<>(nation.getOwnedCells());
-        for (Cell cell : cellsToClear) {
-            cell.setType(CellType.NONE);
-            claimCell(cell, null);
-        }
-
-        if (Rng.nextInt(100) < 75 && !cellsToClear.isEmpty()) {
-            int campsToSpawn = Math.min(Rng.nextInt(7) + 1, cellsToClear.size());
-
-            for (int i = 0; i < campsToSpawn; i++) {
-                int randomIndex = Rng.nextInt(cellsToClear.size());
-                Cell randomCell = cellsToClear.get(randomIndex);
-                randomCell.setType(CellType.CAMP);
-                cellsToClear.remove(randomIndex);
             }
         }
     }
@@ -212,11 +127,11 @@ public class World {
     private void tryExpand(int x, int y, Nation attacker) {
         if (attacker.getPower() < 10) return;
 
-        int nx = x + (Rng.nextInt(3) - 1);
-        int ny = y + (Rng.nextInt(3) - 1);
-        if (nx < 0 || nx >= this.width || ny < 0 || ny >= this.height) return;
+        int nx = x + Rng.nextInt(3) - 1;
+        int ny = y + Rng.nextInt(3) - 1;
+        if (!inBounds(nx, ny)) return;
 
-        Cell target = cells[ny][nx];
+        Cell target = this.cells[ny][nx];
         long cost = 12;
         int chance = (int) (8 + attacker.getPower() / 15);
 
@@ -225,132 +140,106 @@ public class World {
             cost *= 2;
         }
 
-        if (attacker.getGold() < cost * 2) {
-            return;
-        }
+        if (attacker.getGold() < cost * 2) return;
 
         if (target.isGround() && !target.isOwned()) {
             if (attacker.spendGold(cost)) {
-                claimCell(target, attacker);
-                if (target.getType() != CellType.CAPITAL) {
-                    target.setType(CellType.LAND);
-                }
+                claim(target, attacker, CellType.LAND);
                 attacker.addPower(1);
             }
+            return;
+        }
 
-        } else if (target.isOwned() && target.getOwner() != attacker && !target.isShip()) {
-            if (attacker.getState() == SituationState.UNION && target.getOwner().getState() == SituationState.UNION) {
-                return;
-            }
-            if (isFriendly(attacker, target.getOwner())) {
-                return;
-            }
+        if (target.isOwned() && target.getOwner() != attacker && !target.isShip()) {
+            if (isFriendly(attacker, target.getOwner())) return;
 
             if (attacker.getState() == SituationState.WAR) {
-                if (Rng.nextInt(100) < chance) {
-                    if (attacker.spendGold(cost)) {
-                        handleCapitalCaptureIfNeeded(target, attacker);
-                        claimCell(target, attacker);
-                        if (!target.isCapital()) {
-                            target.setType(CellType.LAND);
-                        }
-                        attacker.addPower(1);
-                    }
+                if (Rng.nextInt(100) < chance && attacker.spendGold(cost)) {
+                    handleCapitalCapture(target, attacker);
+                    claim(target, attacker, target.isCapital() ? CellType.CAPITAL : CellType.LAND);
+                    attacker.addPower(1);
                 }
-            } else {
-                if (Rng.nextInt(100) < 2) {
-                    attacker.setState(SituationState.WAR);
-                    target.getOwner().setState(SituationState.WAR);
-                }
+            } else if (Rng.nextInt(100) < 2) {
+                attacker.setState(SituationState.WAR);
+                target.getOwner().setState(SituationState.WAR);
             }
+            return;
+        }
 
-        } else if (target.isWater() && !target.isOwned()) {
-            if (Rng.nextInt(100) < 4 && attacker.spendGold(8)) {
-                if (countShips(attacker) < 7) {
-                    claimCell(target, attacker);
-                    target.setType(CellType.SHIP);
-                }
+        if (target.isWater() && !target.isOwned()) {
+            Cell current = this.cells[y][x];
+            if (current.getType() == CellType.PORT
+                && Rng.nextInt(100) < 4
+                && attacker.spendGold(8)
+                && countShips(attacker) < 7) {
+                claim(target, attacker, CellType.SHIP);
             }
         }
     }
 
     private void trySail(int x, int y, Nation attacker) {
-        int nx = x + (Rng.nextInt(3) - 1);
-        int ny = y + (Rng.nextInt(3) - 1);
-        if (nx < 0 || nx >= this.width || ny < 0 || ny >= this.height) return;
+        int nx = x + Rng.nextInt(3) - 1;
+        int ny = y + Rng.nextInt(3) - 1;
+        if (!inBounds(nx, ny)) return;
 
-        Cell target = cells[ny][nx];
-        Cell current = cells[y][x];
+        Cell target = this.cells[ny][nx];
+        Cell current = this.cells[y][x];
 
         if ((target.isWater() || target.isGround()) && !target.isOwned()) {
             if (attacker.spendGold(5)) {
-                claimCell(current, null);
-                current.setType(CellType.LAND);
-
-                claimCell(target, attacker);
-
-                if (target.isWater()) {
-                    if (countShips(attacker) < 7) {
-                        target.setType(CellType.SHIP);
-                    } else {
-                        target.setType(CellType.LAND);
-                    }
-                } else {
-                    target.setType(CellType.LAND);
-                }
+                clearCell(current);
+                CellType newType = target.isWater() && countShips(attacker) < 7
+                    ? CellType.SHIP
+                    : CellType.LAND;
+                claim(target, attacker, newType);
             }
-        } else if (target.isOwned() && target.getOwner() != attacker && !target.isShip()) {
-            if (isFriendly(attacker, target.getOwner())) {
-                return;
-            }
-            if (attacker.getState() == SituationState.WAR && Rng.nextInt(100) < 25) {
-                if (attacker.spendGold(10)) {
-                    claimCell(current, null);
-                    current.setType(CellType.LAND);
-
-                    claimCell(target, attacker);
-                    if (!target.isCapital()) {
-                        target.setType(CellType.LAND);
-                    }
-                    attacker.addPower(2);
-                }
-            }
+            return;
         }
-    }
 
-    private static void handleCapitalCaptureIfNeeded(Cell target, Nation attacker) {
-        if (target.isCapital()) {
-            Nation defender = target.getOwner();
-            if (defender != null && defender != attacker) {
-                if (Rng.nextInt(100) < 70) {
-                    DiplomacyManager.makeVassal(attacker, defender);
-                }
-            }
-        }
-    }
+        if (target.isOwned()
+            && target.getOwner() != attacker
+            && !target.isShip()
+            && !isFriendly(attacker, target.getOwner())
+            && attacker.getState() == SituationState.WAR
+            && Rng.nextInt(100) < 25
+            && attacker.spendGold(30)) {
 
-    private static int countBuildings(Nation nation, CellType type) {
-        int count = 0;
-        for (Cell cell : nation.getOwnedCells()) {
-            if (cell.getType() == type) count++;
+            clearCell(current);
+            claim(target, attacker, target.isCapital() ? CellType.CAPITAL : CellType.LAND);
+            attacker.addPower(2);
         }
-        return count;
     }
 
     private void tryBuilding(Nation builder) {
-        List<Cell> lands = new ArrayList<>();
+        List<Cell> candidates = new ArrayList<>();
         for (Cell cell : builder.getOwnedCells()) {
             if (cell.getType() == CellType.LAND
                 || cell.getType() == CellType.VILLAGE
                 || cell.getType() == CellType.TOWN) {
-                lands.add(cell);
+                candidates.add(cell);
             }
         }
-        if (lands.isEmpty()) return;
-        Cell cell = Element.getRandomElement(lands);
+        if (candidates.isEmpty()) return;
+
+        Cell cell = Element.getRandomElement(candidates);
+
+        if (cell.getType() == CellType.LAND) {
+            int[] pos = findCellPosition(cell);
+            if (pos != null && isCoastal(pos[0], pos[1])) {
+                if (builder.getGold() >= 450
+                    && countBuildings(builder, CellType.PORT) < 8
+                    && Rng.nextInt(100) < 35) {
+                    builder.spendGold(450);
+                    cell.setType(CellType.PORT);
+                    return;
+                }
+            }
+        }
+
         int cost;
         CellType next;
         int limit;
+
         switch (cell.getType()) {
             case LAND -> {
                 cost = 300;
@@ -362,161 +251,270 @@ public class World {
                 next = CellType.TOWN;
                 limit = 12;
             }
-
             case TOWN -> {
                 cost = 1000;
                 next = CellType.CASTLE;
                 limit = 5;
             }
-
             default -> {
                 return;
             }
         }
-        if (builder.getGold() < cost) return;
-        if (countBuildings(builder, next) >= limit) return;
+
+        if (builder.getGold() < cost || countBuildings(builder, next) >= limit) return;
+
         builder.spendGold(cost);
         cell.setType(next);
+
         if (next == CellType.CASTLE) {
             builder.addPower(25);
         }
     }
 
-    public void updateMarauders() {
-        boolean[][] movedThisTick = new boolean[height][width];
+    private void checkCapitals() {
+        Iterator<Nation> it = this.nations.iterator();
+        while (it.hasNext()) {
+            Nation nation = it.next();
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                Cell cell = cells[y][x];
+            boolean hasLand = false;
+            boolean hasCapital = false;
 
-                if (cell.getType() == CellType.CAMP) {
-                    if (Rng.nextInt(100) < 20) {
-                        Object[] spawnData = getRandomNeighboringLand(x, y);
-                        if (spawnData != null) {
-                            Cell spawnPoint = (Cell) spawnData[0];
-                            if (spawnPoint.getType() == CellType.NONE && !spawnPoint.isOwned()) {
-                                spawnPoint.setType(CellType.MARAUDER);
-                            }
-                        }
-                    }
-                }
+            for (Cell cell : nation.getOwnedCells()) {
+                if (cell.isLand() || cell.isCapital()) hasLand = true;
+                if (cell.isCapital()) hasCapital = true;
+            }
 
-                if (cell.getType() == CellType.MARAUDER && !movedThisTick[y][x]) {
-                    Object[] moveData = getRandomNeighboringLand(x, y);
-
-                    if (moveData != null) {
-                        Cell nextCell = (Cell) moveData[0];
-                        int nx = (Integer) moveData[1];
-                        int ny = (Integer) moveData[2];
-
-                        if (Rng.nextInt(100) < 1) {
-                            cell.setType(CellType.NONE);
-                            continue;
-                        }
-
-                        if (nextCell.isOwned()) {
-                            Nation victim = nextCell.getOwner();
-                            if (victim != null) {
-                                if (nextCell.getType() == CellType.VILLAGE) {
-                                    nextCell.setType(CellType.NONE);
-                                    victim.spendGold(100);
-                                } else {
-                                    victim.spendGold(10);
-                                }
-                            }
-                            nextCell.setOwner(null);
-                        }
-
-                        nextCell.setType(CellType.MARAUDER);
-                        cell.setType(CellType.NONE);
-
-                        movedThisTick[ny][nx] = true;
-                    }
-                }
+            if (!hasLand || (!hasCapital && !nation.isVassal())) {
+                eliminateNation(nation);
+                it.remove();
             }
         }
     }
 
-    private Object[] getRandomNeighboringLand(int cx, int cy) {
-        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-        if (Rng.nextInt(100) < 40) {
-            for (int i = 0; i < directions.length; i++) {
-                int index = Rng.nextInt(directions.length);
-                int[] temp = directions[i];
-                directions[i] = directions[index];
-                directions[index] = temp;
+    private void eliminateNation(Nation nation) {
+        if (nation.isVassal()) {
+            nation.getMaster().removeVassal(nation);
+        }
+        for (Nation vassal : new ArrayList<>(nation.getVassals())) {
+            nation.removeVassal(vassal);
+        }
+
+        List<Cell> owned = new ArrayList<>(nation.getOwnedCells());
+        for (Cell cell : owned) {
+            clearCell(cell);
+        }
+
+        if (Rng.nextInt(100) < 75 && !owned.isEmpty()) {
+            int camps = Math.min(Rng.nextInt(7) + 1, owned.size());
+            for (int i = 0; i < camps; i++) {
+                int idx = Rng.nextInt(owned.size());
+                owned.get(idx).setType(CellType.CAMP);
+                owned.remove(idx);
             }
+        }
+    }
 
-            for (int[] dir : directions) {
-                int nx = cx + dir[0];
-                int ny = cy + dir[1];
-                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                    Cell neighbor = cells[ny][nx];
-                    CellType type = neighbor.getType();
+    private void updateMarauders() {
+        boolean[][] moved = new boolean[this.height][this.width];
 
-                    if (neighbor.isGround()
-                        && type != CellType.CAMP
-                        && type != CellType.CAPITAL
-                        && type != CellType.CASTLE
-                        && type != CellType.MARAUDER) {
+        for (int y = 0; y < this.height; y++) {
+            for (int x = 0; x < this.width; x++) {
+                Cell cell = this.cells[y][x];
 
-                        return new Object[]{neighbor, nx, ny};
+                if (cell.getType() == CellType.CAMP && Rng.nextInt(100) < 20) {
+                    Neighbor neighbor = getRandomNeighborLand(x, y);
+                    if (neighbor != null
+                        && neighbor.cell.getType() == CellType.NONE
+                        && !neighbor.cell.isOwned()) {
+                        neighbor.cell.setType(CellType.MARAUDER);
                     }
+                }
+
+                if (cell.getType() == CellType.MARAUDER && !moved[y][x]) {
+                    Neighbor neighbor = getRandomNeighborLand(x, y);
+                    if (neighbor == null) continue;
+                    if (Rng.nextInt(100) < 1) {
+                        cell.setType(CellType.NONE);
+                        continue;
+                    }
+
+                    Cell next = neighbor.cell;
+
+                    if (next.isOwned()) {
+                        Nation victim = next.getOwner();
+                        if (victim != null) {
+                            if (next.getType() == CellType.VILLAGE) {
+                                next.setType(CellType.NONE);
+                                victim.spendGold(100);
+                            } else {
+                                victim.spendGold(10);
+                            }
+                        }
+                        next.setOwner(null);
+                    }
+
+                    next.setType(CellType.MARAUDER);
+                    cell.setType(CellType.NONE);
+                    moved[neighbor.y][neighbor.x] = true;
                 }
             }
         }
-        return null;
     }
 
     private void rotateState(int tick) {
-        if (tick % 35 == 0) {
-            for (Nation nation : nations) {
-                if (nation.isVassal()) continue;
-                if (nation.getState() == SituationState.UNION) continue;
-                int chance = Rng.nextInt(100);
+        if (tick % 35 != 0) return;
 
-                if (chance < 55) {
-                    nation.setState(SituationState.WAR);
-                } else if (chance < 80 && nations.size() > 1) {
-                    Nation partner = Element.getRandomElement(nations);
-                    if (partner != null && partner != nation && !partner.isVassal()) {
-                        nation.setState(SituationState.UNION);
-                        partner.setState(SituationState.UNION);
-                    }
-                } else {
-                    nation.setState(SituationState.PEACE);
+        for (Nation nation : this.nations) {
+            if (nation.isVassal() || nation.getState() == SituationState.UNION) continue;
+
+            int chance = Rng.nextInt(100);
+            if (chance < 55) {
+                nation.setState(SituationState.WAR);
+            } else if (chance < 80 && this.nations.size() > 1) {
+                Nation partner = Element.getRandomElement(this.nations);
+                if (partner != null && partner != nation && !partner.isVassal()) {
+                    nation.setState(SituationState.UNION);
+                    partner.setState(SituationState.UNION);
                 }
+            } else {
+                nation.setState(SituationState.PEACE);
             }
         }
     }
 
     private boolean isFriendly(Nation a, Nation b) {
         if (a == null || b == null || a == b) return true;
-        if (a.getVassals().contains(b) || b.getVassals().contains(a)) {
-            return true;
-        }
-        if (a.getState() == SituationState.UNION && b.getState() == SituationState.UNION) {
-            return true;
-        }
+        if (a.getVassals().contains(b) || b.getVassals().contains(a)) return true;
+        return a.getState() == SituationState.UNION && b.getState() == SituationState.UNION;
+    }
 
-        return false;
+    private void handleCapitalCapture(Cell target, Nation attacker) {
+        if (!target.isCapital()) return;
+        Nation defender = target.getOwner();
+        if (defender != null && defender != attacker && Rng.nextInt(100) < 70) {
+            DiplomacyManager.makeVassal(attacker, defender);
+        }
+    }
+
+    private void limitShips() {
+        for (Nation nation : this.nations) {
+            int ships = countShips(nation);
+            if (ships <= 7) continue;
+
+            int toRemove = ships - 7;
+            for (Cell cell : new ArrayList<>(nation.getOwnedCells())) {
+                if (toRemove <= 0) break;
+                if (cell.isShip()) {
+                    cell.setType(CellType.LAND);
+                    toRemove--;
+                }
+            }
+        }
     }
 
     public void claimCell(Cell cell, Nation newOwner) {
         if (cell == null) return;
-
         cell.setOwner(newOwner);
-
         if (newOwner == null) {
             cell.setType(CellType.NONE);
         }
     }
 
+    private void claim(Cell cell, Nation owner, CellType type) {
+        if (cell == null) return;
+        cell.setOwner(owner);
+        if (type != null) {
+            cell.setType(type);
+        }
+    }
+
+    private void clearCell(Cell cell) {
+        if (cell == null) return;
+        cell.setOwner(null);
+        cell.setType(CellType.NONE);
+    }
+
+    private boolean inBounds(int x, int y) {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    }
+
+    private boolean isCoastal(int x, int y) {
+        int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for (int[] d : dirs) {
+            int nx = x + d[0];
+            int ny = y + d[1];
+            if (inBounds(nx, ny) && this.cells[ny][nx].isWater()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int countShips(Nation nation) {
+        int count = 0;
+        for (Cell cell : nation.getOwnedCells()) {
+            if (cell.isShip()) count++;
+        }
+        return count;
+    }
+
+    private int countBuildings(Nation nation, CellType type) {
+        int count = 0;
+        for (Cell cell : nation.getOwnedCells()) {
+            if (cell.getType() == type) count++;
+        }
+        return count;
+    }
+
+    private int[] findCellPosition(Cell cell) {
+        for (int y = 0; y < this.height; y++) {
+            for (int x = 0; x < this.width; x++) {
+                if (this.cells[y][x] == cell) {
+                    return new int[]{x, y};
+                }
+            }
+        }
+        return null;
+    }
+
+    private Neighbor getRandomNeighborLand(int cx, int cy) {
+        if (Rng.nextInt(100) >= 40) return null;
+
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
+        for (int i = 0; i < directions.length; i++) {
+            int j = Rng.nextInt(directions.length);
+            int[] tmp = directions[i];
+            directions[i] = directions[j];
+            directions[j] = tmp;
+        }
+
+        for (int[] dir : directions) {
+            int nx = cx + dir[0];
+            int ny = cy + dir[1];
+            if (!inBounds(nx, ny)) continue;
+
+            Cell neighbor = this.cells[ny][nx];
+            CellType type = neighbor.getType();
+
+            if (neighbor.isGround()
+                && type != CellType.CAMP
+                && type != CellType.CAPITAL
+                && type != CellType.CASTLE
+                && type != CellType.MARAUDER) {
+                return new Neighbor(neighbor, nx, ny);
+            }
+        }
+        return null;
+    }
+
+    private record Neighbor(Cell cell, int x, int y) {}
+
     public Cell[][] getCells() {
-        return cells;
+        return this.cells;
     }
 
     public List<Nation> getNations() {
-        return nations;
+        return this.nations;
     }
 }

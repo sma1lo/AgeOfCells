@@ -53,6 +53,8 @@ public class WorldRenderer {
                         symbol = "T";
                     } else if (cell.isVillage()) {
                         symbol = "v";
+                    } else if (cell.isPort()) {
+                        symbol = "P";
                     } else if (cell.isShip()) {
                         symbol = "^";
                     } else if (cell.isLand()) {

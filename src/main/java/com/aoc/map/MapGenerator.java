@@ -77,7 +77,7 @@ public class MapGenerator {
                 Cell cell = cells[y][x];
                 if (cell.isGround() && !cell.isOwned() && cell.getType() == CellType.NONE) {
                     int roll = Rng.nextInt(1000);
-                    if (roll < 3) {
+                    if (roll < 5) {
                         cell.setType(CellType.CAMP);
                     }
                 }
