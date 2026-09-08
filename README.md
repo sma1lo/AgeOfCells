@@ -39,6 +39,7 @@ Age of Cells models emergent historic dynamics on a grid, including territorial 
 | `C`    | Castle           |
 | `T`    | Town             |
 | `v`    | Village          |
+| `P`    | Port             |
 | `c`    | Camp             |
 | `$`    | Gold             |
 | `#`    | Iron             |
@@ -70,11 +71,12 @@ AgeOfCells/
 │       │           │   └── TerrainType.java
 │       │           ├── diplomacy/
 │       │           │   └── DiplomacyManager.java
+│       │           ├── economy/
+│       │           │   └── EconomyManager.java
 │       │           ├── map/
 │       │           │   └── MapGenerator.java
 │       │           ├── nation/
 │       │           │   ├── Nation.java
-│       │           │   ├── NationGenerator.java
 │       │           │   └── SituationState.java
 │       │           ├── render/
 │       │           │   └── WorldRenderer.java
@@ -84,6 +86,7 @@ AgeOfCells/
 │       │               ├── Color.java
 │       │               ├── Element.java
 │       │               ├── Time.java
+│       │               ├── NationGenerator.java
 │       │               ├── Loader.java
 │       │               └── Rng.java
 │       └── resources/

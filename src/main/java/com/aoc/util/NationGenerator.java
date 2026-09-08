@@ -1,8 +1,7 @@
-package com.aoc.nation;
+package com.aoc.util;
 
 import com.aoc.config.Config;
-import com.aoc.util.Color;
-import com.aoc.util.Rng;
+import com.aoc.nation.Nation;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;

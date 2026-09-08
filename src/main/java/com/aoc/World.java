@@ -7,7 +7,7 @@ import com.aoc.diplomacy.DiplomacyManager;
 import com.aoc.economy.EconomyManager;
 import com.aoc.map.MapGenerator;
 import com.aoc.nation.Nation;
-import com.aoc.nation.NationGenerator;
+import com.aoc.util.NationGenerator;
 import com.aoc.nation.SituationState;
 import com.aoc.render.WorldRenderer;
 import com.aoc.util.Element;
