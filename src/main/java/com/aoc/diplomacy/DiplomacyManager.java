@@ -4,12 +4,12 @@ import com.aoc.cell.Cell;
 import com.aoc.cell.CellType;
 import com.aoc.nation.Nation;
 import com.aoc.nation.SituationState;
+import com.aoc.util.Element;
 import com.aoc.util.Rng;
 
 import java.util.List;
 
 public final class DiplomacyManager {
-
     private DiplomacyManager() {
         throw new UnsupportedOperationException("Utility class");
     }
@@ -44,6 +44,27 @@ public final class DiplomacyManager {
             master.addGold(tribute);
         }
 
+    }
+
+    public static void rotateState(int tick, List<Nation> nations) {
+        if (tick % 35 != 0) return;
+
+        for (Nation nation : nations) {
+            if (nation.isVassal() || nation.getState() == SituationState.UNION) continue;
+
+            int chance = Rng.nextInt(100);
+            if (chance < 55) {
+                nation.setState(SituationState.WAR);
+            } else if (chance < 80 && nations.size() > 1) {
+                Nation partner = Element.getRandomElement(nations);
+                if (partner != null && partner != nation && !partner.isVassal()) {
+                    nation.setState(SituationState.UNION);
+                    partner.setState(SituationState.UNION);
+                }
+            } else {
+                nation.setState(SituationState.PEACE);
+            }
+        }
     }
 
     private static void processLibertyDesire(Nation vassal) {

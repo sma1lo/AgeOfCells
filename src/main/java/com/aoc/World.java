@@ -4,6 +4,7 @@ import com.aoc.cell.Cell;
 import com.aoc.cell.CellType;
 import com.aoc.config.Config;
 import com.aoc.diplomacy.DiplomacyManager;
+import com.aoc.economy.EconomyManager;
 import com.aoc.map.MapGenerator;
 import com.aoc.nation.Nation;
 import com.aoc.nation.NationGenerator;
@@ -57,7 +58,7 @@ public class World {
     public void update() {
         int tick = this.time.getCurrentTick();
 
-        collectEconomy();
+        EconomyManager.collectEconomy(nations);
 
         if (tick % 4 == 0) {
             for (Nation nation : this.nations) {
@@ -66,38 +67,11 @@ public class World {
         }
 
         DiplomacyManager.update(this.nations);
-        rotateState(tick);
+        DiplomacyManager.rotateState(tick, this.nations);
         processExpansionAndSailing(tick);
         checkCapitals();
         updateMarauders();
         limitShips();
-    }
-
-    private void collectEconomy() {
-        for (Nation nation : this.nations) {
-            long income = 0;
-
-            for (Cell cell : nation.getOwnedCells()) {
-                income += switch (cell.getType()) {
-                    case CAPITAL -> 4;
-                    case LAND, SHIP -> 1;
-                    case CASTLE, VILLAGE -> 2;
-                    case TOWN -> 3;
-                    default -> 0;
-                };
-
-                income += switch (cell.getTerrain()) {
-                    case GOLD -> 8;
-                    case IRON -> 5;
-                    case COAL -> 3;
-                    default -> 0;
-                };
-            }
-
-            if (income > 0) {
-                nation.addGold(income);
-            }
-        }
     }
 
     private void processExpansionAndSailing(int tick) {
@@ -361,27 +335,6 @@ public class World {
         }
     }
 
-    private void rotateState(int tick) {
-        if (tick % 35 != 0) return;
-
-        for (Nation nation : this.nations) {
-            if (nation.isVassal() || nation.getState() == SituationState.UNION) continue;
-
-            int chance = Rng.nextInt(100);
-            if (chance < 55) {
-                nation.setState(SituationState.WAR);
-            } else if (chance < 80 && this.nations.size() > 1) {
-                Nation partner = Element.getRandomElement(this.nations);
-                if (partner != null && partner != nation && !partner.isVassal()) {
-                    nation.setState(SituationState.UNION);
-                    partner.setState(SituationState.UNION);
-                }
-            } else {
-                nation.setState(SituationState.PEACE);
-            }
-        }
-    }
-
     private boolean isFriendly(Nation a, Nation b) {
         if (a == null || b == null || a == b) return true;
         if (a.getVassals().contains(b) || b.getVassals().contains(a)) return true;
@@ -508,7 +461,8 @@ public class World {
         return null;
     }
 
-    private record Neighbor(Cell cell, int x, int y) {}
+    private record Neighbor(Cell cell, int x, int y) {
+    }
 
     public Cell[][] getCells() {
         return this.cells;
