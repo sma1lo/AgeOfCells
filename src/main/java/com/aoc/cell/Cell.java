@@ -6,11 +6,15 @@ public class Cell {
     private final TerrainType terrain;
     private Nation owner;
     private CellType type;
+    private int x;
+    private int y;
 
-    public Cell(TerrainType terrain) {
+    public Cell(TerrainType terrain, int x, int y) {
         this.terrain = terrain;
         this.owner = null;
         this.type = CellType.NONE;
+        this.x = x;
+        this.y = y;
     }
 
     public TerrainType getTerrain() {
@@ -39,6 +43,22 @@ public class Cell {
 
     public void setType(CellType type) {
         this.type = type;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
     }
 
     public boolean isWater() {

@@ -145,7 +145,7 @@ public class World {
             if (current.getType() == CellType.PORT
                 && Rng.nextInt(100) < 10
                 && attacker.spendGold(8)
-                && countShips(attacker) < 7) {
+                && count(attacker, CellType.SHIP) < 7) {
                 claim(target, attacker, CellType.SHIP);
             }
         }
@@ -162,7 +162,7 @@ public class World {
         if ((target.isWater() || target.isGround()) && !target.isOwned()) {
             if (attacker.spendGold(5)) {
                 clearCell(current);
-                CellType newType = target.isWater() && countShips(attacker) < 7
+                CellType newType = target.isWater() && count(attacker, CellType.SHIP) < 7
                     ? CellType.SHIP
                     : CellType.LAND;
                 claim(target, attacker, newType);
@@ -201,7 +201,7 @@ public class World {
             int[] pos = findCellPosition(cell);
             if (pos != null && isCoastal(pos[0], pos[1])) {
                 if (builder.getGold() >= 450
-                    && countBuildings(builder, CellType.PORT) < 8
+                    && count(builder, CellType.PORT) < 8
                     && Rng.nextInt(100) < 35) {
                     builder.spendGold(450);
                     cell.setType(CellType.PORT);
@@ -235,7 +235,7 @@ public class World {
             }
         }
 
-        if (builder.getGold() < cost || countBuildings(builder, next) >= limit) return;
+        if (builder.getGold() < cost || count(builder, next) >= limit) return;
 
         builder.spendGold(cost);
         cell.setType(next);
@@ -353,7 +353,7 @@ public class World {
 
     private void limitShips() {
         for (Nation nation : this.nations) {
-            int ships = countShips(nation);
+            int ships = count(nation, CellType.SHIP);
             if (ships <= 7) continue;
 
             int toRemove = ships - 7;
@@ -396,15 +396,7 @@ public class World {
         return false;
     }
 
-    private int countShips(Nation nation) {
-        int count = 0;
-        for (Cell cell : nation.getOwnedCells()) {
-            if (cell.isShip()) count++;
-        }
-        return count;
-    }
-
-    private int countBuildings(Nation nation, CellType type) {
+    private int count(Nation nation, CellType type) {
         int count = 0;
         for (Cell cell : nation.getOwnedCells()) {
             if (cell.getType() == type) count++;
