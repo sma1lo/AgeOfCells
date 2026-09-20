@@ -367,20 +367,11 @@ public class World {
         }
     }
 
-    public void claimCell(Cell cell, Nation newOwner) {
-        if (cell == null) return;
-        cell.setOwner(newOwner);
-        if (newOwner == null) {
-            cell.setType(CellType.NONE);
-        }
-    }
-
-    private void claim(Cell cell, Nation owner, CellType type) {
+    public void claim(Cell cell, Nation owner, CellType type) {
         if (cell == null) return;
         cell.setOwner(owner);
-        if (type != null) {
-            cell.setType(type);
-        }
+        if (type != null) cell.setType(type);
+        else if (owner == null) cell.setType(CellType.NONE);
     }
 
     private void clearCell(Cell cell) {

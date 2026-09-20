@@ -62,8 +62,7 @@ public class MapGenerator {
                 int y = Rng.nextInt(height);
                 Cell cell = cells[y][x];
                 if (cell.isGround() && !cell.isOwned()) {
-                    world.claimCell(cell, nation);
-                    cell.setType(CellType.CAPITAL);
+                    world.claim(cell, nation, CellType.CAPITAL);
                     break;
                 }
                 attempts++;
