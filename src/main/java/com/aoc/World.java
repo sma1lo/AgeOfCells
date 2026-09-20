@@ -143,7 +143,7 @@ public class World {
         if (target.isWater() && !target.isOwned()) {
             Cell current = this.cells[y][x];
             if (current.getType() == CellType.PORT
-                && Rng.nextInt(100) < 4
+                && Rng.nextInt(100) < 10
                 && attacker.spendGold(8)
                 && countShips(attacker) < 7) {
                 claim(target, attacker, CellType.SHIP);
@@ -358,7 +358,7 @@ public class World {
             for (Cell cell : new ArrayList<>(nation.getOwnedCells())) {
                 if (toRemove <= 0) break;
                 if (cell.isShip()) {
-                    cell.setType(CellType.LAND);
+                    clearCell(cell);
                     toRemove--;
                 }
             }
