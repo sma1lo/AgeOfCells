@@ -337,8 +337,10 @@ public class World {
 
     private boolean isFriendly(Nation a, Nation b) {
         if (a == null || b == null || a == b) return true;
-        if (a.getVassals().contains(b) || b.getVassals().contains(a)) return true;
-        return a.getState() == SituationState.UNION && b.getState() == SituationState.UNION;
+        return a.getVassals().contains(b)
+            || b.getVassals().contains(a)
+            || a.getMaster() == b
+            || b.getMaster() == a;
     }
 
     private void handleCapitalCapture(Cell target, Nation attacker) {
