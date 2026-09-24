@@ -16,6 +16,7 @@ Age of Cells models emergent historic dynamics on a grid, including territorial 
 * **Diplomacy:** Peace, War and temporary Unions. Capital capture can turn nations into vassals.
 * **Vassal System:** Masters collect tribute. Vassals have Liberty Desire and can rebel.
 * **Economy:** Income from land, capitals, ships and resources.
+* **Marauder:** Marauders appear randomly at the start of the game and when states collapse.
 * **Lanterna TUI:** Smooth terminal rendering with colors and keyboard controls.
 
 ---

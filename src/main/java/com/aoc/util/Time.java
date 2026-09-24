@@ -10,5 +10,4 @@ public final class Time {
     public int getCurrentTick() {
         return this.currentTick;
     }
-
 }
