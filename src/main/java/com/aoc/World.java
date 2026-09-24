@@ -198,8 +198,7 @@ public class World {
         Cell cell = Element.getRandomElement(candidates);
 
         if (cell.getType() == CellType.LAND) {
-            int[] pos = findCellPosition(cell);
-            if (pos != null && isCoastal(pos[0], pos[1])) {
+            if (isCoastal(cell.getX(), cell.getY())) {
                 if (builder.getGold() >= 450
                     && count(builder, CellType.PORT) < 8
                     && Rng.nextInt(100) < 35) {
@@ -402,17 +401,6 @@ public class World {
             if (cell.getType() == type) count++;
         }
         return count;
-    }
-
-    private int[] findCellPosition(Cell cell) {
-        for (int y = 0; y < this.height; y++) {
-            for (int x = 0; x < this.width; x++) {
-                if (this.cells[y][x] == cell) {
-                    return new int[]{x, y};
-                }
-            }
-        }
-        return null;
     }
 
     private Neighbor getRandomNeighborLand(int cx, int cy) {

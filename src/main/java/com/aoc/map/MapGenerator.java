@@ -49,7 +49,7 @@ public class MapGenerator {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                cells[y][x] = new Cell(terrainMap[y][x]);
+                cells[y][x] = new Cell(terrainMap[y][x], x, y);
             }
         }
     }

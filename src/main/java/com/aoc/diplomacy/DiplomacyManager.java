@@ -4,7 +4,6 @@ import com.aoc.cell.Cell;
 import com.aoc.cell.CellType;
 import com.aoc.nation.Nation;
 import com.aoc.nation.SituationState;
-import com.aoc.util.Element;
 import com.aoc.util.Rng;
 
 import java.util.List;
