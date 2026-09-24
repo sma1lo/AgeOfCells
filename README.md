@@ -1,5 +1,26 @@
 # Age of Cells
 
+[![Java Version](https://img.shields.io/badge/Java-17%2B-orange?logo=openjdk)](https://openjdk.org)
+[![Build Tool](https://img.shields.io/badge/Build-Gradle-02303A?logo=gradle)](https://gradle.org)
+[![Dependency](https://img.shields.io/badge/Dependency-Lanterna-blue?logo=gnometerminal)](https://github.com/mabe02/lanterna)
+[![License](https://img.shields.io/github/license/sma1lo/AgeOfCells)](https://github.com/sma1lo/AgeOfCells/blob/main/LICENSE)
+
+
+[![Last Commit](https://img.shields.io/github/last-commit/sma1lo/AgeOfCells)](https://github.com/sma1lo/AgeOfCells/commits)
+[![Commit Activity](https://img.shields.io/github/commit-activity/m/sma1lo/AgeOfCells)](https://github.com/sma1lo/AgeOfCells/graphs/commit-activity)
+[![Repo Size](https://img.shields.io/github/repo-size/sma1lo/AgeOfCells)](https://github.com/sma1lo/AgeOfCells)
+[![Code Size](https://img.shields.io/github/languages/code-size/sma1lo/AgeOfCells)](https://github.com/sma1lo/AgeOfCells)
+[![Top Language](https://img.shields.io/github/languages/top/sma1lo/AgeOfCells)](https://github.com/sma1lo/AgeOfCells)
+
+
+[![Stars](https://img.shields.io/github/stars/sma1lo/AgeOfCells?style=social)](https://github.com/sma1lo/AgeOfCells/stargazers)
+[![Forks](https://img.shields.io/github/forks/sma1lo/AgeOfCells?style=social)](https://github.com/sma1lo/AgeOfCells/network/members)
+[![Watchers](https://img.shields.io/github/watchers/sma1lo/AgeOfCells?style=social)](https://github.com/sma1lo/AgeOfCells/watchers)
+[![Issues](https://img.shields.io/github/issues/sma1lo/AgeOfCells)](https://github.com/sma1lo/AgeOfCells/issues)
+[![Closed Issues](https://img.shields.io/github/issues-closed/sma1lo/AgeOfCells)](https://github.com/sma1lo/AgeOfCells/issues?q=is%3Aissue+is%3Aclosed)
+[![Pull Requests](https://img.shields.io/github/issues-pr/sma1lo/AgeOfCells)](https://github.com/sma1lo/AgeOfCells/pulls)
+[![Contributors](https://img.shields.io/github/contributors/sma1lo/AgeOfCells)](https://github.com/sma1lo/AgeOfCells/graphs/contributors)
+
 An interactive, geopolitical world simulation engine written in Java with **[Lanterna](https://github.com/mabe02/lanterna)**.
 Age of Cells models emergent historic dynamics on a grid, including territorial expansion, economic resource gathering, and state-driven diplomacy with master-vassal hierarchies and rebellion mechanics.
 
